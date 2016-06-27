@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+    <context:component-scan base-package="com.ibm.ijoin" />
+    <context:annotation-config/>
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+        <property name="prefix" value="/WEB-INF/pages/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+    <mvc:annotation-driven/>
+    <mvc:resources mapping="/**" location="/" />
+    <bean id="portalDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="MOBDB" />
+    </bean>
+    <bean id="jdbcTemp" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="portalDataSource" />
+    </bean>
+    <!-- <bean id="contextSource" class="org.springframework.ldap.core.support.LdapContextSource">
+		<property name="url" value="ldap://192.168.31.14:4032"/>
+		<property name="base" value="o=subscribers,dc=vas,dc=indosat,dc=com"/>
+		<property name="userDn" value="cn=wssldap,cn=Users,dc=vas,dc=indosat,dc=com"/>
+		<property name="password" value="wssldappwd"/>
+	</bean>
+	<bean id="ldapTemplate" class="org.springframework.ldap.core.LdapTemplate">
+		<constructor-arg ref="contextSource"/>
+	</bean> -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+</beans>

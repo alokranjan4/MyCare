@@ -1,0 +1,47 @@
+/**
+ * 
+ */
+package com.ibm.indo.controller;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.ibm.indo.util.DBUtil;
+import com.ibm.indo.util.IndoUtil;
+
+/**
+ * @author Aadam
+ *
+ */
+@Controller
+@RequestMapping("/service")
+public class ReportsController {
+		@Autowired
+		private DBUtil dbUtil;
+ 		private static Logger log = Logger.getLogger("dbScheduler");
+        		
+		@RequestMapping(value = "/dbReport")
+		public @ResponseBody void dailyReport(@RequestParam Map<String, String> params, HttpServletResponse response, HttpServletRequest req) {
+			System.out.println("-----------------Start Daily Reports------------------------");
+			
+			IndoUtil.getPrevMins(new Date(),2);
+			
+			List<Map<String, Object>> msisdnlist = dbUtil.getData("select msisdn from SATURN_ACTIVITY where created_on >= sysdate - (02/1440)", new Object[]{});
+
+
+			
+	            
+			System.out.println("-----------------END Daily Reports------------------------");
+		}
+	}

@@ -1,0 +1,32 @@
+
+Jun 19, 2016 24:14:41.70 NEW SESSION
+Jun 19, 2016 24:14:41.70 1466275481701	addons.productaddons	WARN	Failed downloading XML, status: 0, reason: error
+Jun 19, 2016 24:14:45.52 console.warn: Asynchronous operation was aborted as selection changed.
+Jun 19, 2016 24:21:40.53 hashcompleter: notifying failure
+Jun 19, 2016 24:21:40.53 1466275900526	addons.repository	WARN	Search failed when repopulating cache
+Jun 19, 2016 24:21:40.76 1466275900757	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.76 1466275900759	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.76 1466275900759	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.76 1466275900762	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.77 1466275900763	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.77 1466275900764	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.77 1466275900765	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.77 1466275900770	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.77 1466275900771	addons.productaddons	WARN	Failed downloading XML, status: 0, reason: error
+Jun 19, 2016 24:21:40.78 1466275900778	addons.productaddons	WARN	Failed downloading XML, status: 0, reason: error
+Jun 19, 2016 24:21:40.78 1466275900781	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.79 1466275900784	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.79 1466275900791	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.80 1466275900797	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.81 1466275900803	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.81 1466275900809	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.82 1466275900815	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.82 1466275900820	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.83 1466275900826	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.84 1466275900839	addons.update-checker	WARN	HTTP Request failed for an unknown reason
+Jun 19, 2016 24:21:40.86 1466275900852	addons.productaddons	WARN	Failed downloading XML, status: 0, reason: error
+Jun 19, 2016 24:21:40.86 1466275900853	addons.manager	WARN	Failed to update system addons: Error: Failed downloading XML, status: 0, reason: error (resource://gre/modules/addons/ProductAddonChecker.jsm:103:16) JS Stack trace: downloadXML/</fail@ProductAddonChecker.jsm:103:16
+Jun 20, 2016 10:53:45.56 1466400225545	addons.update-checker	WARN	Update manifest for {972ce4c6-7e08-4474-a285-3208198ce6fd} did not contain an updates property
+Jun 20, 2016 10:53:46.23 1466400226247	addons.xpi	ERROR	Failed to clean updated system add-ons directories.: Win error 2 during operation DirectoryIterator.prototype.next on file C:\Users\IBM_ADMIN\AppData\Roaming\Mozilla\Firefox\Profiles\3fyggsfu.default\features (The system cannot find the file specified.
+Jun 20, 2016 10:53:46.23 
+Jun 20, 2016 10:53:46.23 ) ((unknown module)) No traceback available

@@ -1,0 +1,119 @@
+/**
+ * 
+ */
+package com.ibm.indo.controller;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.Logger;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.ibm.indo.util.DBUtil;
+import com.ibm.indo.util.IndoUtil;
+import com.ibm.indo.util.UploadUtil;
+
+/**
+ * @author Aadam
+ *
+ */
+@Controller
+@RequestMapping("/service")
+public class ReportsController {
+		@Autowired
+		private DBUtil dbUtil;
+ 		private static Logger log = Logger.getLogger("saturnLogger");
+        		
+		@RequestMapping(value = "/dailyReport", method = RequestMethod.GET)
+		public @ResponseBody void dailyReport(@RequestParam Map<String, String> params, HttpServletResponse response, HttpServletRequest req) {
+			log.info("-----------------START Daily Reports------------------------");
+			
+	    	XSSFWorkbook workbook = new XSSFWorkbook();
+	    	FileOutputStream stream  = null;
+	    	try{
+	    	List<Map<String, Object>> qry = dbUtil.getData("Select qry,sheet from saturn_report", new Object[]{});
+	    	List<Map<String, Object>> summary = new ArrayList<Map<String, Object>>();
+			if(qry.size()>0){
+				XSSFSheet sheet = null;
+				for(int i=0;i<qry.size();i++){
+					String q = qry.get(i).get("QRY").toString();
+					String sheetName = qry.get(i).get("SHEET").toString();
+					//log.info("ReportsController.dailyReport() query = "+q);
+					log.info("Controller.dailyReport() - "+qry.get(i).get("SHEET"));
+					List<Map<String, Object>> data = dbUtil.getData(q, new Object[]{});
+					int sheetSize = data.size();
+					Map<String,Object> counts = new HashMap<String,Object>();
+					counts.put("Action",sheetName);counts.put("Total", sheetSize);
+					summary.add(counts);
+					log.info("============= Counts ====================="+summary);					 
+					sheet = workbook.createSheet(sheetName);
+					
+					if(data.isEmpty() || data.get(0).isEmpty()){
+						continue;
+					}
+					
+					String[] xlCols = new String[data.get(0).keySet().size()];
+					int j=0;
+					for ( String key : data.get(0).keySet() ) {
+						xlCols[j]=key;
+						j++;
+					}
+										
+					//String[] dbCols = new String[] { "ID", "NAME", "PWD"};
+					sheet = UploadUtil.downloadMultipleSheetExcel(sheet, xlCols, xlCols, data);
+					//log.info("Query - "+q);
+				}
+				sheet = workbook.createSheet("Summary");
+				String[] xlCols = {"Action","Total"};
+				sheet = UploadUtil.downloadMultipleSheetExcel(sheet, xlCols, xlCols, summary);
+				workbook.setSheetOrder("Summary", 0);
+				}
+				log.info("Report Stored --------------- @ /app/saturnReports/");
+				stream = new FileOutputStream("/app/saturnReports/MyCare Transaction Report_"+IndoUtil.getPrevDate(new Date(), 1)+".xlsx");
+				workbook.write(stream);
+				stream.close();
+	    	}catch(Exception ce){
+	    		log.debug("GenericServiceImpl.start() -Exception "+IndoUtil.getFullLog(ce));
+	    	}finally{
+	    		if(null!=stream){
+	    			try {stream.close();} catch (IOException e) {}
+	    		}
+	    	}
+			log.info("-----------------END Daily Reports------------------------");
+		}		
+		
+		@RequestMapping(value = "/sentEmail", method = RequestMethod.GET)
+		public @ResponseBody void sentEmail() {
+			
+						
+}

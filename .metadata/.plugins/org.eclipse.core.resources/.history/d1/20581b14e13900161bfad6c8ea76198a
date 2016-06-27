@@ -1,0 +1,316 @@
+package com.ibm.ijoin.serviceImpl;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.ibm.ijoin.service.GenericService;
+import com.ibm.ijoin.util.DBUtil;
+import com.ibm.ijoin.util.IndoUtil;
+
+@Service
+public class GenericServiceImpl implements GenericService{
+	
+	@Autowired
+	DBUtil dbUtil;
+	
+	/*@Autowired
+	Base64Converter base64;*/
+	
+	private static Logger log = Logger.getLogger("ijoinLogger");
+	
+	@Override
+	public Map<String, Object> retrieveApplication(String serviceType) {
+		log.info("GenericServiceImpl.getApplication() - START");
+		Map<String, Object> map=new HashMap<String, Object>();	
+		List<Map<String, Object>> app = null;
+		try{
+			if(StringUtils.isEmpty(serviceType)){
+				app = dbUtil.getData("SELECT * from ijoin_type", new Object[]{});
+			}else{
+				app = dbUtil.getData("SELECT * from ijoin_type where serviceType=?", new Object[]{serviceType});
+			}
+			map.put("ApplicationList", app);
+			map.put("Status", "SUCCESS");
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.retrieveApplication() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.retrieveApplication() - END");
+		}
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> retrievePacks(String points) {
+		log.info("GenericServiceImpl.retrievePacks() - START");
+		log.info("Inputs are like  ----" +points);
+		Map<String, Object> map=new HashMap<String, Object>();	
+		Map<String, Object> map1= null;
+		ArrayList<Object> list= new ArrayList<>();
+		List<Map<String, Object>> applist =  null;
+		int point= Integer.parseInt(points);
+		
+		try{
+			 if(points.equals("sms") || points.equals("call")){
+				 applist = dbUtil.getData("SELECT pack_name_en,Pack_name_id,pack_code_en,pack_code_id,pack_desc_en,Pack_desc_id,tariff from ijoin_packs where points=?", new Object[]{points});
+				 for (Map<String, Object> data : applist) {
+						list.add(data);
+					}
+				 map.put("ServicePack", list);
+			 }
+			 else if(point>0){
+				applist = dbUtil.getData("SELECT pack_name_en,Pack_name_id,pack_code_en,pack_code_id,pack_desc_en,Pack_desc_id,tariff,points from ijoin_packs where points=?", new Object[]{points});
+				for (Map<String, Object> data : applist) {
+					list.add(data);
+				}
+				map.put("Packs", list);
+			}else{
+				applist = dbUtil.getData("SELECT pack_name_en,Pack_name_id,pack_code_en,pack_code_id,pack_desc_en,Pack_desc_id,tariff,recommanded_pkg from ijoin_packs where points=?", new Object[]{points});
+				for (Map<String, Object> data : applist) {
+						list.add(data);
+				}
+				map.put("Recommended", list);
+			}
+			 map.put("Status", "SUCCESS");
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.retrievePacks() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.retrievePacks - END");
+		}
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> regUser(String login_id, String msisdn1, String name, String email,String password,String cust_img, String id_img, String gender, String id_number,String dob,String place_of_birth, String alt_number, String maiden_name, String address,String act_status,String act_date, String icc_id) {
+		Map<String, Object> map=new HashMap<String, Object>();	
+		
+		String msisdn =  IndoUtil.prefix62(msisdn1);
+		try{
+			int	ct = dbUtil.saveData("insert into ijoin_user(login_id,msisdn,name,email,password,CUST_IMG,ID_IMG,GENDER,ID_NUMBER,DOB,PLACE_OF_BIRTH,ALT_NUMBER,MAIDEN_NAME,ADDRESS,ACT_STATUS,ACT_DATE,ICC_ID) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", new Object[]{login_id,msisdn,name,email,password,cust_img,id_img,gender,id_number,dob,place_of_birth,alt_number,maiden_name,address,act_status,act_date,icc_id});
+			if(ct>0){
+				map.put("Status", "SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.regUser() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.regUser - END");
+		}
+		return map;	
+	}
+
+	@Override
+	public Map<String, Object> uploadImage(String login_id,String msisdn1,String cust_img,String id_img) {
+		Map<String, Object> map=new HashMap<String, Object>();
+		Map<String, Object> map1=new HashMap<String, Object>();
+		String msisdn =  IndoUtil.prefix62(msisdn1);
+		int ct = 0;
+		try{
+			List<Map<String, Object>> list = dbUtil.getData("select * from ijoin_user where login_id=? or msisdn=?",new Object[]{login_id,msisdn});
+			for (Map<String, Object> data1 : list) {
+				map1 = (Map<String, Object>) data1;
+			}
+			if(map1.get("login_id").toString().equals(login_id) || map1.get("msisdn").toString().equals(msisdn)) {
+				ct =dbUtil.saveData("update ijoin_user SET cust_img=?,id_img=? where login_id=? or msisdn=?",new Object[]{cust_img,id_img,login_id,msisdn});
+			}		
+			else {
+				System.out.println("Insert Stmt");
+				ct = dbUtil.saveData("insert into ijoin_user(login_id,msisdn,cust_img,id_img) VALUES(?,?,?,?)", new Object[]{login_id,msisdn,cust_img,id_img});
+			}
+			if(ct>0){
+				map.put("Status","SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.uploadImage() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.uploadImage - END");
+		}
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> retrievedetails(String login_id, String msisdn1) {
+		Map<String, Object> map=new HashMap<String, Object>();
+		String msisdn =  IndoUtil.prefix62(msisdn1);
+		try{
+			List<Map<String, Object>> list =dbUtil.getData("select * from ijoin_user where login_id = ? or msisdn= ?", new Object[]{login_id,msisdn});
+			if(list.size()>0){
+				map.put("Details", list);
+				map.put("Status", "SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.retrievedetails() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.retrievedetails - END");
+		}
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> orderdetails(String rownum1,String rownum2 ) {
+		Map<String, Object> map=new HashMap<String, Object>();
+		int count =0;
+		try{
+			count =Integer.parseInt(dbUtil.getData("select count(*) count from ijoin_order", new Object[]{}).get(0).get("COUNT").toString());
+			
+			List<Map<String, Object>> list =dbUtil.getData("select * from (select a.ORDER_ID,a.INVOICE,b.MSISDN,b.ACT_STATUS,a.DELIVERY_STATUS, rownum r from ijoin_order a,ijoin_user b ORDER BY order_date DESC) where r >=? and r <=?", new Object[]{rownum1,rownum2});
+			List<List<Object>> rows = new ArrayList<List<Object>>();
+			
+			for(Map<String,Object> m : list){
+				List<Object> row = new ArrayList<Object>();
+				row.add(m.get("ORDER_ID"));
+				row.add(m.get("INVOICE"));
+				row.add(m.get("MSISDN"));
+				row.add(m.get("ACT_STATUS"));
+				row.add(m.get("DELIVERY_STATUS"));
+				rows.add(row);
+			}
+			if(list.size()>0){
+				map.put("recordsTotal", count);
+				map.put("recordsFiltered", count);
+				map.put("data", rows);
+				map.put("Status", "SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.orderdetails() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.orderdetails - END");
+		}
+		return map;
+	}
+	
+	@Override
+	public Map<String, Object> getOrderDetails(String ORDER_ID) {
+		Map<String, Object> map=new HashMap<String, Object>();
+		List<Map<String, Object>> list = null;
+		BufferedImage image = null;
+		InputStream imageStream = null;
+		System.out.println("GenericServiceImpl.getOrderDetails() ORDER_ID :"+ORDER_ID+":");
+		try{
+			list =dbUtil.getData("select a.*,b.* from ijoin_order a,ijoin_user b where a.ORDER_ID =? and a.login_id=b.login_id", new Object[]{ORDER_ID});
+			System.out.println("GenericServiceImpl.getOrderDetails() size "+list.size());
+			if(list.size()>0){
+				FileInputStream imageInFile = new FileInputStream("C:/Users/Public/Pictures/Sample Pictures/Penguins.jpg");
+	            byte imageData[] = new byte[(int) file.length()];
+	            imageInFile.read(imageData);
+	 
+	            // Converting Image byte array into Base64 String
+	            String imageDataString = encodeImage(imageData);
+	 
+	            // Converting a Base64 String into Image byte array
+	            byte[] imageByteArray = decodeImage(imageDataString);
+	            System.out.println(imageByteArray);
+	            // Write a image byte array into file system
+	            FileOutputStream imageOutFile = new FileOutputStream(
+	                    "C:/Users/Public/Pictures/Sample Pictures/Penguins-after-convert.jpg");
+	 
+	            imageOutFile.write(imageByteArray);
+	 
+	            imageInFile.close();
+	            imageOutFile.close();
+	 
+	            System.out.println("Image Successfully Manipulated!");
+	            
+	            
+		        o.writeObject(list.get(0).get("CUST_IMG"));
+		        
+		        System.out.println("image..." + image);
+		        map.put("Image", o);
+				map.put("Details", list);
+				map.put("Status", "SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.getOrderDetails() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.getOrderDetails - END");
+		}
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> updateOrder(String order_id,String msisdn, String act_status, String icc_id) {
+		Map<String, Object> map=new HashMap<String, Object>();
+		List list=null;
+		try{
+			
+			list = dbUtil.getData("select login_id from ijoin_order where order_id=? ", new Object[]{order_id});
+
+			Map<String, Object> map1=(Map<String, Object>) list.get(0);
+			String loginID=(String) map1.get("LOGIN_ID");
+			System.out.println(loginID);
+			
+			int count = dbUtil.saveData("update ijoin_user set msisdn=?,act_status=?,icc_id=? where login_id=?",new Object[]{msisdn,act_status,icc_id,loginID} );
+			System.out.println(count);
+			
+			if(count>0){
+				map.put("Status", "SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			System.out.println("Saturn-2051- GenericServiceImpl.updateOrder() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.updateOrder - END");
+		}
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> getImage(String Orderid) {
+		Map<String, Object> map=new HashMap<String, Object>();
+		List<Map<String, Object>> list = null;
+		System.out.println("GenericServiceImpl.getImage() ORDER_ID :"+Orderid+":");
+		try{
+			list =dbUtil.getData("select b.cust_img,b.id_img from ijoin_order a,ijoin_user b where a.ORDER_ID =? and a.login_id=b.login_id", new Object[]{Orderid});
+			System.out.println("GenericServiceImpl.getImage() "+list);
+			/*base64.decodeImage(list.get(0).get("cust_img").toString());
+			base64.decodeImage(list.get(0).get("id_img").toString());*/
+			if(list.size()>0){
+				map.put("Details", list);
+				map.put("Status", "SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.getImage() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.getImage - END");
+		}
+		return map;
+	}
+	
+	 public static String encodeImage(byte[] imageByteArray) {
+	        return Base64.encodeBase64URLSafeString(imageByteArray);
+	    }
+	 
+	    /**
+	     * Decodes the base64 string into byte array
+	     *
+	     * @param imageDataString - a {@link java.lang.String}
+	     * @return byte array
+	     */
+	    public static byte[] decodeImage(String imageDataString) {
+	        return Base64.decodeBase64(imageDataString);
+	    }
+	    
+}

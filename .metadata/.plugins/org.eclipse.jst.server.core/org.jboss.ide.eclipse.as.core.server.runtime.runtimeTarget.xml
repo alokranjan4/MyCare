@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<classpath>
+  <source-attachment entry="C:/jboss-as-7.1.1.Final/modules/org/infinispan/main/infinispan-core-5.1.2.FINAL.jar" runtime-id="JBoss 7.1 Runtime" source-attachment-path="C:/Users/IBM_ADMIN/.m2/repository/org/infinispan/infinispan-core/5.1.2.FINAL/infinispan-core-5.1.2.FINAL-sources.jar"/>
+  <source-attachment entry="C:/jboss-as-7.1.1.Final/modules/indo/lib/main/org-apache-commons-codec.jar" runtime-id="JBoss 7.1 Runtime" source-attachment-path="C:/Users/IBM_ADMIN/Downloads/commons-codec-1.8.jar/commons-codec-1.8.jar"/>
+  <source-attachment entry="C:/jboss-as-7.1.1.Final/modules/indo/lib/main/spring-web-4.1.7.RELEASE.jar" runtime-id="JBoss 7.1 Runtime" source-attachment-path="C:/Users/IBM_ADMIN/.m2/repository/org/springframework/spring-web/4.1.7.RELEASE/spring-web-4.1.7.RELEASE-sources.jar"/>
+</classpath>

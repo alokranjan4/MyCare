@@ -1,0 +1,24 @@
+# Properties must use the following format : key|context|version=value
+# key = regular java property key
+# context = either jbosstools or devstudio
+# version = Major.Minor.Micro.Qualifier (without the timestamp)
+# or
+# version = Major.Minor.Micro
+# or
+# version = Major.Minor
+# or
+# version = Major
+#
+# version can be optional for a given context.
+# context can be optional (but version can't be set)
+#
+# JBOSS TOOLS
+# ===========
+
+##Discovery
+# =========
+
+### CI snapshot builds
+# master version of jbosstools-earlyaccess.properties should be edited here, so the discovery job can fetch it: http://download.jboss.org/jbosstools/neon/snapshots/updates/earlyaccess.properties/master/jbosstools-earlyaccess.properties
+#jboss.discovery.directory.url|jbosstools|4.4.1.Alpha1=http://download.jboss.org/jbosstools/neon/snapshots/builds/jbosstools-discovery.earlyaccess_master/latest/all/repo/jbosstools-directory.xml
+#jboss.discovery.site.url|jbosstools|4.4.1.Alpha1=http://download.jboss.org/jbosstoo

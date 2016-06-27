@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;com.ibm.indo.controller.ReportJob&apos; to &apos;OrionJob&apos;&#x0D;&#x0A;- Original project: &apos;Orion&apos;&#x0D;&#x0A;- Original element: &apos;com.ibm.indo.controller.ReportJob&apos;&#x0D;&#x0A;- Renamed element: &apos;com.ibm.indo.controller.OrionJob&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;ReportJob&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src&lt;com.ibm.indo.controller{ReportJob.java[ReportJob" matchStrategy="1" name="OrionJob" qualified="false" references="true" similarDeclarations="false" stamp="1467010323131" textual="false" version="1.0"/>
+</session>

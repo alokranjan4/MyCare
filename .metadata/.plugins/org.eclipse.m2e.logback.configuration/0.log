@@ -1,0 +1,6 @@
+2016-05-30 15:48:15,720 [Worker-120] INFO  o.e.m.c.i.e.AbstractTransferListenerAdapter - Downloading https://repo.maven.apache.org/maven2/org/jboss/logging/jboss-logging/3.1.0.GA/jboss-logging-3.1.0.GA-sources.jar
+2016-05-30 15:48:16,433 [Worker-120] INFO  o.e.m.c.i.e.AbstractTransferListenerAdapter - Downloaded https://repo.maven.apache.org/maven2/org/jboss/logging/jboss-logging/3.1.0.GA/jboss-logging-3.1.0.GA-sources.jar
+2016-05-31 17:51:32,780 [Worker-153] INFO  o.e.m.c.i.e.AbstractTransferListenerAdapter - Downloading https://repo.maven.apache.org/maven2/javax/mail/mail/1.4.4/mail-1.4.4-sources.jar
+2016-05-31 17:51:35,806 [Worker-153] INFO  o.e.m.c.i.e.AbstractTransferListenerAdapter - Downloaded https://repo.maven.apache.org/maven2/javax/mail/mail/1.4.4/mail-1.4.4-sources.jar
+2016-06-13 13:47:35,673 [Worker-15] INFO  o.e.m.c.i.e.AbstractTransferListenerAdapter - Downloading https://repo.maven.apache.org/maven2/org/infinispan/infinispan-core/5.1.2.FINAL/infinispan-core-5.1.2.FINAL-sources.jar
+2016-06-13 13:47:58,216 [Worker-15] INFO  o.e.m.c.i.e.AbstractTransferListenerAdapter - Downloaded https://repo.maven.apache.org/maven2/org/infinispan/infinispan-core/5.1.2.FINAL/infinispan-core-5.1.2.FINAL-sources.jar

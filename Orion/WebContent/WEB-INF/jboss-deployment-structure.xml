@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-deployment-structure>
+  <deployment>
+     <dependencies>
+     <module name="org.infinispan">
+        <imports>
+        <include path="META-INF**"/>
+        </imports>
+        <imports>
+           <include path="**" />
+        </imports>
+        <imports>
+           <include path="org**" />
+         </imports>
+         <imports>
+           <include path="com**" />
+         </imports>
+         <imports>
+           <include path="java**" />
+         </imports>
+         <imports>
+           <include path="javax**" />
+         </imports>
+     </module>
+     <module name="saturn.lib">
+        <imports>
+        <include path="META-INF**"/>
+        </imports>
+         <imports>
+           <include path="org**" />
+         </imports>
+         <imports>
+           <include path="com**" />
+         </imports>
+         <imports>
+           <include path="java**" />
+         </imports>
+         <imports>
+           <include path="javax**" />
+         </imports>
+	</module>
+     </dependencies>
+     <exclusions>
+			<module name="org.apache.log4j"/>
+	        <module name="org.slf4j" />
+	        <module name="org.apache.commons.logging"/>
+	        <module name="org.log4j"/>  
+	        <module name="org.jboss.logging"/>
+		</exclusions>
+  </deployment>
+</jboss-deployment-structure>
