@@ -35,8 +35,6 @@ public class ReportsController {
 	private DBUtil dbUtil;
 	// private static Logger log = Logger.getLogger("dbScheduler");
 
-	/* This method will create the list of msisdn on a aprticular time */
-	
 	@RequestMapping(value = "/dbReport")
 	public @ResponseBody void dailyReport(@RequestParam Map<String, String> params, HttpServletResponse response,
 			HttpServletRequest req) {
