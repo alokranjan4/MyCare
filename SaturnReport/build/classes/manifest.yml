@@ -1,4 +1,0 @@
-applications:
-- disk_quota: 1024M
-  path: TestDevopsPOC.war
-  buildpack: java_buildpack

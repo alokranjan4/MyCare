@@ -1,0 +1,1120 @@
+package com.ibm.ijoin.serviceImpl;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Service;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.ibm.ijoin.service.GenericService;
+import com.ibm.ijoin.service.HttpConnService;
+import com.ibm.ijoin.util.Base64Converter;
+import com.ibm.ijoin.util.DBUtil;
+import com.ibm.ijoin.util.IndoSQLConstants;
+import com.ibm.ijoin.util.IndoUtil;
+import com.ibm.services.vo.PackageInfor;
+import com.ibm.services.vo.UpdatePackage;
+
+@Service
+public class GenericServiceImpl implements GenericService{
+	
+	@Autowired
+	DBUtil dbUtil;
+	
+	@Autowired
+	HttpConnService httpConn;
+	
+	/*@Autowired
+	Base64Converter base64;*/
+	
+	private static Logger log = Logger.getLogger("ijoinLogger");
+	
+	@Override
+	public Map<String, Object> retrieveApplication(String serviceType) {
+		log.info("GenericServiceImpl.getApplication() - START");
+		Map<String, Object> map=new HashMap<String, Object>();	
+		List<Map<String, Object>> app = null;
+		try{
+			if(StringUtils.isEmpty(serviceType)){
+				app = dbUtil.getData("SELECT * from ijoin_type", new Object[]{});
+			}else{
+				app = dbUtil.getData("SELECT * from ijoin_type where serviceType=?", new Object[]{serviceType});
+			}
+			map.put("ApplicationList", app);
+			map.put("Status", "SUCCESS");
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.retrieveApplication() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.retrieveApplication() - END");
+		}
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> retrievePacks(String points) {
+
+		log.info("GenericServiceImpl.retrievePacks() - START");
+		log.info("Inputs are like  ----" +points);
+		Map<String, Object> map=new HashMap<String, Object>();	
+		Map<String, Object> map1= null;
+		ArrayList<Object> list= new ArrayList<>();
+		List<Map<String, Object>> applist =  null;
+
+
+		try{
+			if(StringUtils.isNumeric(points)){
+				int point= Integer.parseInt(points);
+				if(point>0){
+					applist = dbUtil.getData("SELECT pack_name_en,Pack_name_id,pack_code_en,pack_code_id,pack_desc_en,Pack_desc_id,tariff,points from ijoin_packs where points=?", new Object[]{points});
+					for (Map<String, Object> data : applist) {
+						list.add(data);
+					}
+					map.put("Packs", list);
+				}else{
+					applist = dbUtil.getData("SELECT pack_name_en,Pack_name_id,pack_code_en,pack_code_id,pack_desc_en,Pack_desc_id,tariff,recommanded_pkg from ijoin_packs where points=?", new Object[]{points});
+					for (Map<String, Object> data : applist) {
+							list.add(data);
+					}
+					map.put("Recommended", list);
+				}
+			}else{
+				 applist = dbUtil.getData("SELECT pack_name_en,Pack_name_id,pack_code_en,pack_code_id,pack_desc_en,Pack_desc_id,tariff from ijoin_packs where points=?", new Object[]{points});
+				 for (Map<String, Object> data : applist) {
+						list.add(data);
+					}
+				 map.put("ServicePack", list);
+			}
+			map.put("Status", "SUCCESS");
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.retrievePacks() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.retrievePacks - END");
+		}
+	return map;
+	}
+	@Override
+	public Map<String, Object> regUser(String login_id, String msisdn1, String name, String email,String password,String cust_img, String id_img, String gender, String id_number,String dob,String place_of_birth, String alt_number, String maiden_name, String address,String act_status,String act_date, String icc_id) {
+		Map<String, Object> map=new HashMap<String, Object>();	
+		
+		String msisdn =  IndoUtil.prefix62(msisdn1);
+		try{
+			int	ct = dbUtil.saveData("insert into ijoin_user(login_id,msisdn,name,email,password,CUST_IMG,ID_IMG,GENDER,ID_NUMBER,DOB,PLACE_OF_BIRTH,ALT_NUMBER,MAIDEN_NAME,ADDRESS,ACT_STATUS,ACT_DATE,ICC_ID) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", new Object[]{login_id,msisdn,name,email,password,cust_img,id_img,gender,id_number,dob,place_of_birth,alt_number,maiden_name,address,act_status,act_date,icc_id});
+			if(ct>0){
+				map.put("Status", "SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.regUser() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.regUser - END");
+		}
+		return map;	
+	}
+
+	@Override
+	public Map<String, Object> uploadImage(String login_id,String msisdn1,String cust_img,String id_img) {
+		Map<String, Object> map=new HashMap<String, Object>();
+		Map<String, Object> map1=new HashMap<String, Object>();
+		String msisdn =  IndoUtil.prefix62(msisdn1);
+		int ct = 0;
+		try{
+			List<Map<String, Object>> list = dbUtil.getData("select * from ijoin_user where login_id=? or msisdn=?",new Object[]{login_id,msisdn});
+			for (Map<String, Object> data1 : list) {
+				map1 = (Map<String, Object>) data1;
+			}
+			if(map1.get("login_id").toString().equals(login_id) || map1.get("msisdn").toString().equals(msisdn)) {
+				ct =dbUtil.saveData("update ijoin_user SET cust_img=?,id_img=? where login_id=? or msisdn=?",new Object[]{cust_img,id_img,login_id,msisdn});
+			}		
+			else {
+				System.out.println("Insert Stmt");
+				ct = dbUtil.saveData("insert into ijoin_user(login_id,msisdn,cust_img,id_img) VALUES(?,?,?,?)", new Object[]{login_id,msisdn,cust_img,id_img});
+			}
+			if(ct>0){
+				map.put("Status","SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.uploadImage() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.uploadImage - END");
+		}
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> retrievedetails(String login_id, String msisdn1) {
+		Map<String, Object> map=new HashMap<String, Object>();
+		String msisdn =  IndoUtil.prefix62(msisdn1);
+		try{
+			List<Map<String, Object>> list =dbUtil.getData("select * from ijoin_user where login_id = ? or msisdn= ?", new Object[]{login_id,msisdn});
+			if(list.size()>0){
+				map.put("Details", list);
+				map.put("Status", "SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.retrievedetails() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.retrievedetails - END");
+		}
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> getOrderDetails(String ORDER_ID) {
+		Map<String, Object> map=new HashMap<String, Object>();
+		List<Map<String, Object>> list = null;
+		System.out.println("GenericServiceImpl.getOrderDetails() ORDER_ID :"+ORDER_ID+":");
+		try{
+			list =dbUtil.getData("select a.*,b.* from ijoin_order a,ijoin_user b where a.ORDER_ID =? and a.login_id=b.login_id", new Object[]{ORDER_ID});
+			System.out.println("GenericServiceImpl.getOrderDetails() size "+list.size());
+			if(list.size()>0){
+				map.put("Details", list);
+				map.put("Status", "SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.getOrderDetails() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.getOrderDetails - END");
+		}
+		return map;
+	}
+	
+	@Override
+	public Map<String, Object> orderdetails(String rownum1,String rownum2 ) {
+		Map<String, Object> map=new HashMap<String, Object>();
+		int count =0;
+		try{
+			count =Integer.parseInt(dbUtil.getData("select count(*) count from ijoin_order", new Object[]{}).get(0).get("COUNT").toString());
+			
+			List<Map<String, Object>> list =dbUtil.getData("select * from (select a.ORDER_ID,a.INVOICE,b.MSISDN,b.ACT_STATUS,a.DELIVERY_STATUS, rownum r from ijoin_order a,ijoin_user b ORDER BY order_date DESC) where r >=? and r <=?", new Object[]{rownum1,rownum2});
+			List<List<Object>> rows = new ArrayList<List<Object>>();
+			
+			for(Map<String,Object> m : list){
+				List<Object> row = new ArrayList<Object>();
+				row.add(m.get("ORDER_ID"));
+				row.add(m.get("INVOICE"));
+				row.add(m.get("MSISDN"));
+				row.add(m.get("ACT_STATUS"));
+				row.add(m.get("DELIVERY_STATUS"));
+				rows.add(row);
+			}
+			if(list.size()>0){
+				map.put("recordsTotal", count);
+				map.put("recordsFiltered", count);
+				map.put("data", rows);
+				map.put("Status", "SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.orderdetails() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.orderdetails - END");
+		}
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> updateOrder(String order_id,String msisdn, String act_status, String icc_id) {
+		Map<String, Object> map=new HashMap<String, Object>();
+		List list=null;
+		try{
+			
+			list = dbUtil.getData("select login_id from ijoin_order where order_id=? ", new Object[]{order_id});
+
+			Map<String, Object> map1=(Map<String, Object>) list.get(0);
+			String loginID=(String) map1.get("LOGIN_ID");
+			System.out.println(loginID);
+			
+			int count = dbUtil.saveData("update ijoin_user set msisdn=?,act_status=?,icc_id=? where login_id=?",new Object[]{msisdn,act_status,icc_id,loginID} );
+			System.out.println(count);
+			
+			if(count>0){
+				map.put("Status", "SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			System.out.println("Saturn-2051- GenericServiceImpl.updateOrder() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.updateOrder - END");
+		}
+		return map;
+	}
+
+	@Override
+	public Map<String, Object> getImage(String Orderid) {
+		Map<String, Object> map=new HashMap<String, Object>();
+		List<Map<String, Object>> list = null;
+		System.out.println("GenericServiceImpl.getImage() ORDER_ID :"+Orderid+":");
+		try{
+			list =dbUtil.getData("select a.cust_img,a.id_img from ijoin_user a,ijoin_order b where b.ORDER_ID =? and a.login_id=b.login_id", new Object[]{Orderid});
+			System.out.println("GenericServiceImpl.getImage() "+list);
+			String cust_img = list.get(0).get("cust_img").toString();
+			String id_img = list.get(0).get("id_img").toString();
+			if(list.size()>0){
+				map.put("cust_img", cust_img);
+				map.put("id_img", id_img);
+				map.put("Details", list);
+				map.put("Status", "SUCCESS");
+			}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.getImage() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.getImage - END");
+		}
+		return map;
+	}
+	
+	@Override
+	public Map<String, Object> validateUser(String uid, String pwd) {
+		log.info("GenericServiceImpl.validateUser(-).............start.");
+		Map<String, Object> data = new HashMap<String, Object>();
+		try {
+			log.info("GenericServiceImpl.validateUser(-).dbUtil.getRow(-).............start.");
+
+			data = dbUtil.getRow(IndoSQLConstants.GET_USER, new Object[] { uid });
+
+			log.info("GenericServiceImpl.validateUser(-).dbUtil.getRow(-).............start.");
+			log.info("db password :" + data.get("USER_PASSWORD").toString() + "     user enter password : " + pwd);
+			String LoginID= data.get("USERID").toString();
+			if (data.get("USER_PASSWORD").toString().equals(pwd)) {
+				data.put("LoginID",LoginID);
+				data.put("Status", "SUCCESS");
+				return data;
+			}
+		} catch (EmptyResultDataAccessException ce) {
+			IndoUtil.populateErrorMap(data, "Indo-100", "Subscriber number not found. Please register.", 0);
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.validateUser() e - " + ce);
+			IndoUtil.populateErrorMap(data, "Indo-100", "Faile to login.", 0);
+		}
+		log.info("GenericServiceImpl.validateUser(-).............end. map :" + data);
+		return data;
+	}
+
+	@Override
+	public Map<String, Object> registerUser(String uid, String pwd, String email, String name, String dob, String pob,
+			String addr) {
+		Map<String, Object> data = new HashMap<String, Object>();
+		try {
+			int ct = dbUtil.saveData(
+					"Insert into im2_users(userid,user_password, email_id,firstname,dob,pob,area_id) values(?,'IM21234',?,?,to_date(?,'dd-mm-yyyy'))",
+					new Object[] { uid, email, name, dob, pob, addr });
+			if (ct > 0) {
+				data.put("Status", "SUCCESS");
+			} else {
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to register now. Please try again later.", 0);
+			}
+		} catch (EmptyResultDataAccessException ce) {
+			IndoUtil.populateErrorMap(data, "Indo-101", "Unable to register now. Please try again later.", 0);
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.registerUser() e - " + ce);
+			IndoUtil.populateErrorMap(data, "Indo-100", ce.getClass().getSimpleName(), 0);
+		}
+		return data;
+	}
+
+	@Override
+	public Map<String, Object> forgot(String userid, String msisdn) {
+		log.info("GenericServiceImpl.forgot(-) userID" + userid + " and msisdn number : " + msisdn);
+		Map<String, Object> data = new HashMap<String, Object>();
+		List<Map<String, Object>> vList = new ArrayList<Map<String, Object>>();
+		try {
+			log.info("GenericServiceImpl.forgot(-) start hit db");
+			vList = dbUtil.getData("select * from IM2_users where msisdn=? and userId=?",new Object[] { msisdn, userid });
+			if (vList != null && vList.size() > 0) {
+					for (Map<String, Object> map : vList) {
+					log.info("In foreach Loop .");
+					data = (Map<String, Object>) map;
+				}
+				log.info("GenericServiceImpl.forgot(-) password retrive :");
+				data.put("Status", "SUCCESS");
+			} else {
+				log.info("GenericServiceImpl.forgot(-) else 2 List  :" + vList);
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to validate User now. Please try again later.", 0);
+			}
+		} catch (EmptyResultDataAccessException ce) {
+			IndoUtil.populateErrorMap(data, "Indo-101", "Unable to Validate User now. Please try again later.", 0);
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.forgot() e - " + ce);
+			IndoUtil.populateErrorMap(data, "Indo-100", ce.getClass().getSimpleName(), 0);
+		}
+		log.info("GenericServiceImpl.forget(-) end :");
+		return data;
+	}
+
+	@Override
+	public Map<String, Object> changePassword(String newpassword, String userId, String msisdn) {
+			Map<String, Object> data = new HashMap<String, Object>();
+			log.info("GenericServiceImpl.changePassword(-) start hit db");
+			int count = dbUtil.saveData("update IM2_USERS SET USER_PASSWORD=?  where msisdn=? and userId=?",new Object[] { newpassword, msisdn, userId });
+			log.info("GenericServiceImpl.changePassword(-)  n :"+count);
+		if (count >= 0) {
+			data.put("Status", "SUCCESS");
+		} else {
+			data.put("Status", "FAILTURE");
+		}
+			log.info("GenericServiceImpl.forget(-) end :");
+		return data;
+	}
+
+	@Override
+	public List<Map<String, Object>> getPackage(String pkg_code, String pkg_category, String pkg_group) {
+		Map<String, Object> data = new HashMap<String, Object>();
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		try {
+			list = dbUtil.getData("select * from SATURN_PACKAGE_INFO where PACKAGE_CODE =? and PACKAGE_CATEGORY =? and PACKAGE_GROUP =? ",new Object[] { pkg_code, pkg_category, pkg_group });
+			log.info("getPackage(-) List :" + list);
+			if (list != null) {
+				data.put("Status", "SUCCESS");
+				return list;
+				} else
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to get Package. Please try again later.", 0);
+			} catch (EmptyResultDataAccessException ce) {
+			IndoUtil.populateErrorMap(data, "Indo-100", "Unable to get Package. Please try again later..", 0);
+			} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.getPackage() e - " + ce);
+			IndoUtil.populateErrorMap(data, "Indo-100", "Fail to get Package.", 0);
+			}
+		return list;
+	}
+
+	@Override
+	public List<Map<String, Object>> getallPackage() {
+		Map<String, Object> data = new HashMap<String, Object>();
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		try {
+			list = dbUtil.getData("select DISTINCT package_code , package_group, PACKAGE_CATEGORY from SATURN_PACKAGE_INFO",new Object[] {});
+			if (list != null) {
+				data.put("Status", "SUCCESS");
+			} else
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to get Package. Please try again later.", 0);
+		} catch (EmptyResultDataAccessException ce) {
+			IndoUtil.populateErrorMap(data, "Indo-100", "Unable to get Package. Please try again later.", 0);
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.getallPackage() e - " + ce);
+			IndoUtil.populateErrorMap(data, "Indo-100", "Faile to login.", 0);
+		}
+		return list;
+	}
+
+	@Override
+	public Map<String, Object> updatePackag(String pkg_name_en, String tariff, String benefit_en, String benefit_id,String gift_flag, String Buy_flag, String buy_extra_flag, String param, String unre_param, String keyword,String unreg_keyword, String pkg_name_id) {
+		Map<String, Object> data = new HashMap<String, Object>();
+			try {
+			int n = dbUtil.saveData("update SATURN_PACKAGE_INFO SET PACKAGE_NAME_EN =?,TARIFF =?,BENEFIT_EN =?,BENEFIT_ID =?,GIFT_FLAG =?,BUY_FLAG =?,BUY_EXTRA_FLAG =?,PARAM =?,KEYWORD =?,UNREG_KEYWORD =?,UNREG_PARAM =?,PACKAGE_NAME_ID =?",
+									new Object[] { pkg_name_en, tariff, benefit_en, benefit_id, gift_flag, Buy_flag, buy_extra_flag,param, unre_param, unreg_keyword, pkg_name_id });
+			if (n != 0) {
+				data.put("Status", "SUCCESS");
+			} else
+				data.put("Status", "FAILURE");
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.updatePackage() e - " + ce);
+		}
+		return data;
+	}
+
+	@Override
+	public Map<String, Object> newStore(String id, String name, String city, String address, String Longitude,String LattiTude, String StoreDescription) {
+		Map<String, Object> data = new HashMap<String, Object>();
+		try {
+			int n = dbUtil.saveData("Insert into SATURN_STORE_DATA (ID,NAME,CITY,ADDRESS,LONGITUDE,LATTITUDE,STORE_DESC) values (?,?,?,?,?,?,?)",
+						new Object[] { id, name, city, address, Longitude, LattiTude, StoreDescription });
+		  	log.info("int n : " + n);
+				if (n != 0)
+					data.put("Status", "SUCCESS");
+				else
+					data.put("Status", "FAILURE");
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.newStore() e - " + ce);
+		}
+		return data;
+	}
+	
+	@Override
+	public Map<String, Object> newPackage2(String PACKAGE_NAME, String Packagegroup, String TARIFF, String QUOTA,String GIFT_FLAG, String BUY_FLAG, String BUY_EXTRA_FLAG, String PARAM, String COMMENTS, String PACKAGE_CATEGORY,String UNREG_KEYWORD, String UNREG_PARAM, String SERVICECLASS,String DESCRIPTION,String KEYWORD){
+			Map<String, Object> data = new HashMap<String, Object>();
+		try {
+			int n = dbUtil.saveData("Insert into SATURN_PACKAGES_INFO (DESCRIPTION,KEYWORD,TARIFF,QUOTA,PACKAGE_GROUP,PACKAGE_NAME,GIFT_FLAG,BUY_FLAG,BUY_EXTRA_FLAG,PARAM,COMMENTS,PACKAGE_CATEGORY,UNREG_KEYWORD,UNREG_PARAM,SERVICECLASS) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+					new Object[] { DESCRIPTION,KEYWORD,TARIFF,QUOTA,Packagegroup,PACKAGE_NAME,GIFT_FLAG,BUY_FLAG,BUY_EXTRA_FLAG,PARAM,COMMENTS,PACKAGE_CATEGORY,UNREG_KEYWORD,UNREG_PARAM,SERVICECLASS});
+			log.info("int n : " + n);
+			if (n!=0)
+				data.put("Status", "SUCCESS");
+			else
+				data.put("Status", "FAILURE");	
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.newPackage2() e - " + ce);
+		}
+		return data;
+	}
+
+	@Override
+	public Map<String, Object> EditStore(String id, String name, String city, String address, String Longitude,String LattiTude, String StoreDescription) {
+			Map<String, Object> data = new HashMap<String, Object>();
+			try {
+				int n = dbUtil.saveData("update SATURN_STORE_DATA  SET city =?, address =?, LONGITUDE=?, LATTITUDE =?, STORE_DESC =? where id=? and name=?",
+						new Object[] { city, address, Longitude, LattiTude, StoreDescription, id, name });
+				log.info("EditStore n : "+n);
+				if (n != 0)
+					data.put("Status", "SUCCESS");
+				else
+					data.put("Status", "FAILURE");
+			}
+		 catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.EditStore() e - " + ce);
+		}
+		return data;
+	}
+	
+	@Override
+	public Map<String, Object> NewSspPackage(String package_cod, String keyword, String shortCode) {
+				log.info("GenericServiceImpl.UpdateSspPackage_code(-). start ");
+				Map<String, Object> data = new HashMap<String, Object>();
+			try {
+				int n = dbUtil.saveData("Insert into SATURN_PACKAGE_ACT (Pack_code,keyword,short_code) values (?,?,?)",new Object[] { package_cod, keyword, shortCode });
+				log.info("int n : " + n);
+				if (n != 0)
+					data.put("Status", "SUCCESS");
+				else
+					data.put("Status", "FAILURE");
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.UpdateSspPackage_code() e - " + ce);
+		}
+			 log.info("GenericServiceImpl.UpdateSspPackage_code(-). end ");
+					
+		return data;
+	}
+
+	@Override
+	public Map<String, Object> NewPackage1(UpdatePackage updatePackage) {
+		 log.info("GenericServiceImpl.NewPackage1(-). Start ");
+		Map<String, Object> data = new HashMap<String, Object>();
+		try {
+			int n = dbUtil.saveData("Insert into SATURN_PACKAGE_CATEGORY (PACKAGE_TYPE,PACKAGE_CATEGORY,DESCRIPTION,BANNER_IMAGE,PACKAGE_CATEGORY_ID,CAT_SEQ) values (?,?,?,?,?,?)",
+					new Object[] { updatePackage.getPackageType(), updatePackage.getPackageCategory(),updatePackage.getDescription(), null, updatePackage.getPackageCategoryID(),Integer.parseInt(updatePackage.getCatSeq())});
+				log.info("int n : " + n);
+				if (n != 0)
+					data.put("Status", "SUCCESS");
+				else
+					data.put("Status", "FAILURE");
+	
+			} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.NewPackage1() e - " + ce);
+		}
+		 log.info("GenericServiceImpl.NewPackage1(-). End ");
+		return data;
+	}
+
+	@Override
+	public Map<String, Object> EditPackage1(UpdatePackage updatePackage) {
+			log.info("GenericServiceImpl.EditPackage1(-). Start ");
+			Map<String, Object> data = new HashMap<String, Object>();
+			try {
+				int n = dbUtil.saveData("update SATURN_PACKAGE_CATEGORY  SET DESCRIPTION =?, BANNER_IMAGE =? ,PACKAGE_CATEGORY_ID=? ,CAT_SEQ=? where PACKAGE_TYPE=? and PACKAGE_CATEGORY=?",
+					new Object[] { updatePackage.getDescription(), null, updatePackage.getPackageCategoryID(),Integer.parseInt(updatePackage.getCatSeq()), updatePackage.getPackageType(),updatePackage.getPackageCategory() });
+					log.info("int n : "+n);
+				if (n!=0)
+					data.put("Status", "SUCCESS");
+				else
+					data.put("Status", "FAILURE");
+			} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.EditPackage1() e - " + ce);
+			}
+			log.info("GenericServiceImpl.EditPackage1(-). End ");
+		return data;
+	}
+	
+	@Override
+	public Map<String, Object> EditOffer(PackageInfor packageInfor) {
+			log.info("GenericServiceImpl.EditOffer(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+			try {
+				String BannerEN = Base64Converter.encodeImage(packageInfor.getBannerImageEN().getBytes());
+				String BannerID = Base64Converter.encodeImage(packageInfor.getBannerImageID().getBytes());
+				int n = dbUtil.saveData("update SATURN_OFFERS  SET PACKAGE_CODE =?, TARIFF =? , OFFER_NAME_ID=?, OFFER_NAME_EN =?  ,  BENEFIT_ID =? ,BENEFIT_EN=?, KEYWORD=? ,PARAM=? ,OFFER_LINK=?,  CUST_TYPE=? ,BANNER_IMAGE_ID=?, BANNER_IMAGE_EN=? where OFFER_ID=? and OFFER_TYPE=?",
+					new Object[] { packageInfor.getPackageCode(), packageInfor.getTariff(),packageInfor.getOfferNameID(), packageInfor.getOfferNameEN(), packageInfor.getBenefitID(),packageInfor.getBenefitEN(), packageInfor.getKeyword(), packageInfor.getParam(),packageInfor.getOfferLink(), packageInfor.getCustomerType(), BannerID, BannerEN,packageInfor.getOfferID(), packageInfor.getOfferType() });
+				log.info("int n :"+n);
+				if (n != 0)
+					data.put("Status", "SUCCESS");
+				else
+					data.put("Status", "FAILURE");
+				} catch (Exception ce) {
+				log.info("Indo-100- GenericServiceImpl.EditOffer() e - " + ce);
+			}
+			log.info("GenericServiceImpl.EditOffer(-). End");
+		return data;
+	}
+
+
+	@Override
+	public Map<String, Object> EditSSPOffer(String pack_code, String keyword, String short_code) {
+			log.info("GenericServiceImpl.EditSSPOffer(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+			try {
+				int n = dbUtil.saveData("update SATURN_PACKAGE_ACT  SET  KEYWORD =? , SHORT_CODE=?  where PACK_CODE=? ",new Object[] { keyword,short_code,pack_code });
+				log.info("int n :"+n);
+				if (n != 0)
+				data.put("Status", "SUCCESS");
+			else
+				data.put("Status", "FAILURE");
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.EditSSPOffer() e - " + ce);
+		}
+			log.info("GenericServiceImpl.EditSSPOffer(-). End");
+		return data;
+	}
+
+	@Override
+	public Map<String, Object> NewOffer(PackageInfor packageInfor) {
+			log.info("GenericServiceImpl.NewOffer(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+			try {
+				String BannerEN = Base64Converter.encodeImage(packageInfor.getBannerImageEN().getBytes());
+				String BannerID = Base64Converter.encodeImage(packageInfor.getBannerImageID().getBytes());
+				int n = dbUtil.saveData("Insert into SATURN_OFFERS (OFFER_ID,PACKAGE_CODE,TARIFF,OFFER_NAME_ID,OFFER_NAME_EN,BENEFIT_ID,BENEFIT_EN,KEYWORD,PARAM,OFFER_LINK,OFFER_TYPE,CUST_TYPE,BANNER_IMAGE_ID,BANNER_IMAGE_EN) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+					new Object[] { packageInfor.getOfferID(), packageInfor.getPackageCode(), packageInfor.getTariff(),packageInfor.getOfferNameID(), packageInfor.getOfferNameEN(), packageInfor.getBenefitID(),packageInfor.getBenefitEN(), packageInfor.getKeyword(), packageInfor.getParam(),packageInfor.getOfferLink(), packageInfor.getOfferType(), packageInfor.getCustomerType(),BannerID, BannerEN });
+				log.info("int n : " + n);
+				if (n != 0)
+					data.put("Status", "SUCCESS");
+				else
+					data.put("Status", "FAILURE");
+			}catch(Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.NewOffer() e - " + ce);
+			}
+			log.info("GenericServiceImpl.NewOffer(-). End");	
+		return data;
+	}
+
+	@Override
+	public List<Map<String, Object>> getAllOffer() {
+				log.info("GenericServiceImpl.getAllOffer(-). Start");
+				Map<String, Object> data = new HashMap<String, Object>();
+				List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+			try {
+				list = dbUtil.getData("select DISTINCT OFFER_ID , PACKAGE_CODE from SATURN_OFFERS", new Object[] {});
+				log.info("offer List : " + list);
+				if (list != null) {
+					data.put("Status", "SUCCESS");
+				} else
+					IndoUtil.populateErrorMap(data, "Indo-101", "Unable to get Package. Please try again later.", 0);
+			} catch (Exception ce) {
+				IndoUtil.populateErrorMap(data, "Indo-100", "Unable to get Package. Please try again later.", 0);
+			}
+			log.info("GenericServiceImpl.getAllOffer(-). End");					
+		return list;
+	}
+
+	@Override
+	public List<Map<String, Object>> getAllStore() {
+			log.info("GenericServiceImpl.getAllStore(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+			List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		try{
+			list = dbUtil.getData("select DISTINCT ID , Name from SATURN_STORE_DATA", new Object[] {});
+			log.info("offer List : " + list);
+			if (list != null) {
+				data.put("Status", "SUCCESS");
+			} else
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to get Store. Please try again later.", 0);
+		}catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.getAllStore() e - " + ce);
+			IndoUtil.populateErrorMap(data, "Indo-100", "Unable to get Store. Please try again later.", 0);
+		}
+		log.info("GenericServiceImpl.getAllStore(-). End");
+		return list;
+	}
+
+	@Override
+	public List<Map<String, Object>> getAllOfferSSP() {
+		log.info("GenericServiceImpl.getAllOfferSSP(-). Start");
+		Map<String, Object> data = new HashMap<String, Object>();
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		try {
+			list = dbUtil.getData("select DISTINCT PACK_CODE  from SATURN_PACKAGE_ACT", new Object[] {});
+			log.info("offer List : " + list);
+			if (list != null) {
+				data.put("Status", "SUCCESS");
+			} else
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to GET ACTIVE PACK. Please try again later.", 0);
+		 } catch (Exception ce) {
+			 log.info("Indo-100- GenericServiceImpl.getAllOfferSSP() e - " + ce);
+			 IndoUtil.populateErrorMap(data, "Indo-100", "Unable to GET ACTIVE PACK. Please try again later.", 0);
+		}
+		log.info("GenericServiceImpl.getAllOfferSSP(-). End");	
+		return list;
+	}
+	
+	public List getPackage1(String PACKAGE_TYPE, String PACKAGE_CATEGORY) {
+		log.info("GenericServiceImpl.getPackage1(-). Start");
+		Map<String, Object> data = new HashMap<String, Object>();
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		try {
+			 list = dbUtil.getData("select * from SATURN_PACKAGE_CATEGORY where PACKAGE_TYPE =? and PACKAGE_CATEGORY =? ",new Object[] { PACKAGE_TYPE, PACKAGE_CATEGORY });
+			 log.info("getPackage1-------" + list);
+			if (list != null) {
+				data.put("Status", "SUCCESS");
+			}else
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to get Package. Please try again later.", 0);
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.getOffer() e - " + ce);			
+			IndoUtil.populateErrorMap(data, "Indo-100", "Unable to get Package. Please try again later.", 0);
+		}
+		log.info("GenericServiceImpl.getPackage1(-). End");
+		return list;
+	}
+	
+	@SuppressWarnings("unused")
+	public List getOffer(String OfferID, String package_Code) {
+			log.info("GenericServiceImpl.getPackage1(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+			List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+			try {
+				list = dbUtil.getData("select * from SATURN_OFFERS where Offer_ID =? and PACKAGE_Code =? ",new Object[] { OfferID, package_Code });
+				log.info("getOffer-------" + list);
+			  String imgEN= list.get(0).get("BANNER_IMAGE_EN").toString();
+			  String imgID=list.get(0).get("BANNER_IMAGE_ID").toString();
+			  byte[] imgEN_byte= Base64Converter.decodeImage(imgEN);
+			  InputStream is=new ByteArrayInputStream(imgEN_byte);
+		      
+		      /*String fileID="C:/jboss-as-7.1.1.Final/standalone/deployments/BANNER_IMAGE_ID.png";
+			  String fileEN="C:/jboss-as-7.1.1.Final/standalone/deployments/BANNER_IMAGE_EN.png";
+			  OutputStream os=new FileOutputStream(fileID);
+			  OutputStream os1=new FileOutputStream(fileEN);
+			  os.write(imgID_byte);
+			  os.write(imgEN_byte);
+			  list.get(0).remove("BANNER_IMAGE_EN");
+			  list.get(0).remove("BANNER_IMAGE_ID");
+			  list.get(0).put("BANNER_IMAGE_EN", fileEN);
+			  */
+			  list.get(0).put("BANNER_IMAGE_EN", is);
+			  log.info("getOffer-------"+list);
+			if (list != null) {
+				data.put("Status", "SUCCESS");
+			} else
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to get Package. Please try again later.", 0);
+		} catch (Exception ce) {
+			IndoUtil.populateErrorMap(data, "Indo-100", "Unable to get Package. Please try again later.", 0);
+			log.info("Indo-100- GenericServiceImpl.getOffer() e - " + ce);
+		}
+		log.info("GenericServiceImpl.getOffer(-). End");
+		return list;
+	}
+
+	public List getPackage2(String PackageName, String package_Group) {
+			log.info("GenericServiceImpl.getPackage2(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+			List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		try {
+			list = dbUtil.getData("select * from SATURN_PACKAGES_INFO where PACKAGE_NAME =? and PACKAGE_GROUP =? ",new Object[] { PackageName, package_Group });
+			log.info("getPackage2-------" + list);
+			if (list != null) {
+				data.put("Status", "SUCCESS");
+			}else
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to get Package. Please try again later.", 0);
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.getPackage2() e - " + ce);
+			IndoUtil.populateErrorMap(data, "Indo-100", "Subscriber number not found. Please register.", 0);
+	}
+		log.info("GenericServiceImpl.getPackage2(-). End");	
+		return list;
+ }
+
+
+	
+	public List getStore(String ID, String Name) {
+			log.info("GenericServiceImpl.getStore(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+			List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		try {
+			list = dbUtil.getData("select * from SATURN_STORE_DATA where ID =? and Name=? ",new Object[] {ID,Name});
+			log.info("getStore-------" + list);
+			if (list != null) {
+				data.put("Status", "SUCCESS");
+			}else
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to get Package. Please try again later.", 0);
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.getStore() e - " + ce);
+			IndoUtil.populateErrorMap(data, "Indo-100", "Unable to get Package. Please try again later.", 0);
+		}
+		log.info("GenericServiceImpl.getStore(-). End");	
+		return list;
+
+	}
+
+	
+	@Override
+	public List EditOffer(String OfferID, String package_Code) {
+			log.info("GenericServiceImpl.EditOffer(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+			List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		try {
+			list = dbUtil.getData("select Offer_ID,Package_Code,Tariff,Offer_name_ID,Offer_name_EN,Benefi_ID,Benefi_EN,KeyWord,Param,Offer_link,Offer_Type,Cust_type from SATURN_OFFERS where Offer_ID =? and PACKAGE_Code =? ",
+					new Object[] { OfferID, package_Code });
+			log.info("dattaaaaaaaaaaa-------" + list);
+			/*
+			 * Decode operation
+			 * 
+			 * String srtimg= list.get(0).get("BANNER_IMAGE_EN").toString();
+			 * byte[] base64= Base64Converter.decodeImage(srtimg);
+			 * list.get(0).put("BANNER_IMAGE_EN",base64);
+			 * log.info("dattaaaaaaaaaaa-------"+list);
+			 */
+			if (list != null) {
+				data.put("Status", "SUCCESS");
+				return list;
+			} else
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to get Package. Please try again later.", 0);
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.getOffer() e - " + ce);
+			IndoUtil.populateErrorMap(data, "Indo-100", "Subscriber number not found. Please register.", 0);
+		}
+		log.info("GenericServiceImpl.EditOffer(-). End");	
+		return list;
+	}
+
+	@Override
+	public Map<String, Object> deleteOffer(String OfferID, String package_Code) {
+			log.info("GenericServiceImpl.deleteOffer(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+		try{
+			int n = dbUtil.saveData("delete from SATURN_OFFERS where Offer_ID =? and PACKAGE_Code =? ",new Object[] { OfferID, package_Code });
+			log.info("int n : " + n);
+			if (n != 0)
+				data.put("Status", "SUCCESS");
+			else
+				data.put("Status", "FAILURE");
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.NewOffer() e - " + ce);
+		}
+		log.info("GenericServiceImpl.deleteOffer(-). End");
+		return data;
+	}
+
+	@Override
+	public Map<String, Object> deletePackage1(String PACKAGE_TYPE, String PACKAGE_CATEGORY) {
+				log.info("GenericServiceImpl.deletePackage1(-). Start");
+				Map<String, Object> data = new HashMap<String, Object>();
+			try {
+				int n = dbUtil.saveData("delete from desc SATURN_PACKAGE_CATEGORY where PACKAGE_TYPE =? and PACKAGE_CATEGORY =? ",new Object[] { PACKAGE_TYPE, PACKAGE_CATEGORY });
+				log.info("int n : " + n);
+				if (n != 0)
+					data.put("Status", "SUCCESS");
+				else
+					data.put("Status", "FAILURE");
+				}catch (Exception ce) {
+					log.info("Indo-100- GenericServiceImpl.deletePackage1() e - " + ce);
+			}
+			log.info("GenericServiceImpl.deletePackage1(-). End");			
+		return data;
+	}
+
+	@Override
+	public Map<String, Object> deletePackage2(String PACKAGE_Name, String PACKAGE_group){
+			log.info("GenericServiceImpl.deletePackage2(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+		try{
+			int n = dbUtil.saveData("delete from SATURN_PACKAGES_INFO where PACKAGE_NAME =? and PACKAGE_GROUP=? ",new Object[] {PACKAGE_Name,PACKAGE_group});
+			log.info("int n : " + n);
+			if (n != 0)
+				data.put("Status", "SUCCESS");
+			else
+				data.put("Status", "FAILURE");
+			}catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.NewOffer() e - " + ce);
+		}
+			log.info("GenericServiceImpl.deletePackage2(-). End");
+		return data;
+
+	}
+
+	@Override
+	public Map<String, Object> deleteSSPOffer(String Pack_code) {
+			log.info("GenericServiceImpl.deleteSSPOffer(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+		try{
+			int n = dbUtil.saveData("delete from SATURN_PACKAGE_ACT where PACK_Code =? ",new Object[] {Pack_code});
+			log.info("int n : " + n);
+			if (n != 0)
+				data.put("Status", "SUCCESS");
+			else
+				data.put("Status", "FAILURE");
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.deleteSSPOffer() e - " + ce);
+		}
+		log.info("GenericServiceImpl.deleteSSPOffer(-). End");
+		return data;
+
+	}
+	
+	@Override
+	public List<Map<String, Object>> getSSPOffer(String pkg_code) {
+			log.info("GenericServiceImpl.getSSPOffer(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+			List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		try {
+			list = dbUtil.getData("select * from SATURN_PACKAGE_ACT where PACK_CODE =?",new Object[] {pkg_code});
+			log.info("getSSPOffer list:" + list);
+			if (list != null) {
+				data.put("Status", "SUCCESS");
+			}else
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to get Package. Please try again later.", 0);
+
+			}catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.getSSPOffer() e - " + ce);
+			IndoUtil.populateErrorMap(data, "Indo-100","Unable to get Package. Please try again later.", 0);
+		}
+		log.info("GenericServiceImpl.getSSPOffer(-). End");
+		return list;
+	}
+
+	@Override
+	public Map<String, Object> deleteStore(String ID, String NAme) {
+			log.info("GenericServiceImpl.deleteStore(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+		try {
+			int n = dbUtil.saveData("delete from SATURN_STORE_DATA  where id=? and name=?",new Object[] {ID,NAme});
+			log.info("int n : "+ n);
+			if (n != 0)
+				data.put("Status", "SUCCESS");
+			else
+				data.put("Status", "FAILURE");
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.deleteStore() e - " + ce);
+		}
+		log.info("GenericServiceImpl.deleteStore(-). End");
+		return data;
+	}
+
+	@Override
+	public List<Map<String, Object>> getAllPackage1() {
+			log.info("GenericServiceImpl.getAllPackage1(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+			List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		try {
+			list = dbUtil.getData("select DISTINCT PACKAGE_TYPE , PACKAGE_CATEGORY from SATURN_PACKAGE_CATEGORY", new Object[] {});
+			log.info("offer List : " + list);
+			if (list != null) {
+				data.put("Status", "SUCCESS");
+			} else
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to get Package. Please try again later.", 0);
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.getAllPackage1() e - " + ce);
+			IndoUtil.populateErrorMap(data, "Indo-100", "Unable to get Package. Please try again later.", 0);
+		}
+		log.info("GenericServiceImpl.getAllPackage1(-). End");
+		return list;
+	}
+	
+	@Override
+	public List<Map<String, Object>> getAllPackage2() {
+			log.info("GenericServiceImpl.getAllPackage2(-). Start");
+			Map<String, Object> data = new HashMap<String, Object>();
+			List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		try{
+			list = dbUtil.getData("select DISTINCT PACKAGE_NAME , PACKAGE_GROUP from SATURN_PACKAGES_INFO", new Object[] {});
+			log.info("offer List : " + list);
+			if (list != null) {
+				data.put("Status", "SUCCESS");
+			} else
+				IndoUtil.populateErrorMap(data, "Indo-101", "Unable to get Package. Please try again later.", 0);
+
+		} catch (Exception ce) {
+			log.info("Indo-100- GenericServiceImpl.getAllPackage2() e - " + ce);
+			IndoUtil.populateErrorMap(data, "Indo-100", "Unable to get Package. Please try again later.", 0);
+		}
+		log.info("GenericServiceImpl.getAllPackage2(-). End");
+		return list;
+	}
+	
+	
+	public Map<String, Object> EditPackage2(String PACKAGE_NAME, String Packagegroup, String TARIFF, String QUOTA,String GIFT_FLAG, String BUY_FLAG, String BUY_EXTRA_FLAG, String PARAM, String COMMENTS, String PACKAGE_CATEGORY,String UNREG_KEYWORD, String UNREG_PARAM, String SERVICECLASS,String DESCRIPTION,String KEYWORD){
+		log.info("GenericServiceImpl.EditPackage2(-). End");
+			Map<String, Object> data = new HashMap<String, Object>();
+		try{
+			int n = dbUtil.saveData("update SATURN_PACKAGES_INFO  SET DESCRIPTION =?, KEYWORD =?, TARIFF=?, QUOTA =?, GIFT_FLAG=?,BUY_FLAG=?,BUY_EXTRA_FLAG=?, PARAM=?,COMMENTS=?,PACKAGE_CATEGORY=?,UNREG_KEYWORD=? ,UNREG_PARAM=?,SERVICECLASS=? where PACKAGE_NAME=? and PACKAGE_GROUP=?",
+					new Object[] { DESCRIPTION, KEYWORD, TARIFF, QUOTA,GIFT_FLAG,BUY_FLAG,BUY_EXTRA_FLAG,PARAM,COMMENTS,PACKAGE_CATEGORY,UNREG_KEYWORD,UNREG_PARAM,SERVICECLASS, PACKAGE_NAME, Packagegroup});
+			log.info("int n : "+n);
+			if (n != 0)
+				data.put("Status", "SUCCESS");
+			else
+				data.put("Status", "FAILURE");
+		}catch(Exception ce){
+			log.info("Indo-100- GenericServiceImpl.EditPackage2() e - " + ce);
+			IndoUtil.populateErrorMap(data, "Indo-100", "Unable to get Package2. Please try again later.", 0);
+		}
+		log.info("GenericServiceImpl.EditPackage2(-). Start");
+		return data;
+		}
+	
+	@Override
+	public Map<String, Object> createOrder(String msisdn, String login_id, String ship_addr,String city,String state,String country,String postcode) {
+		int order = IndoUtil.randInt(111111, 999999);
+		int track = IndoUtil.randInt(11111111, 99999999);
+		String name="",email="";
+		Map<String, Object> map=new HashMap<String, Object>();
+		try{
+			Map<String, Object> status= etobeeServiceCreate(msisdn, login_id, ship_addr, city, state, country, postcode);
+				if(IndoUtil.isSuccess(status)){
+					List<Map<String, Object>> data = dbUtil.getData("select * from ijoin_user where msisdn= ? or login_id=?", new Object[]{IndoUtil.prefix62(msisdn),login_id});
+					if(null!=data && data.size()>0){
+						if(StringUtils.isEmpty(login_id)){
+							login_id=data.get(0).get("LOGIN_ID").toString();
+						}
+						if(StringUtils.isEmpty(msisdn)){
+							msisdn=data.get(0).get("ALT_NUMBER").toString();
+						}
+						name = data.get(0).get("NAME").toString();
+						email= data.get(0).get("EMAIL").toString();
+					}
+				
+					int ct =dbUtil.saveData("insert into IJOIN_ORDER(order_id,invoice,ship_address,order_date,tracking_num,delivery_status,login_id)"
+							+ " values(?,?,?,SYSDATE,?,?,?)", new Object[]{login_id,order,order,ship_addr,track,"Ready",login_id,city,state,country,postcode});
+					if(ct>0){
+						map.put("OrderId", order);
+						map.put("TrackingId", track);
+						map.put("Status", "SUCCESS");
+					}
+				}
+				else{
+					map.put("Status", "FAILURE");
+				}
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.retrievePacks() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+			log.info("GenericServiceImpl.retrievePacks - END");
+		}
+		return null;
+	}
+	
+	@Override
+	public Map<String, Object> etobeeServiceCreate(String msisdn, String login_id, String ship_addr,String city,String state,String country,String postcode){
+		int track = IndoUtil.randInt(11111111, 99999999);
+		HttpEntity entity = null;
+		CloseableHttpClient  client = null;
+		HttpPost request = null;
+		Map<String,Object> map = new HashMap<String,Object>();
+		try{
+			client = httpConn.getHttpClient();
+			JsonArray jArray = new JsonArray();
+			JsonObject jMain = new JsonObject();
+			jMain.addProperty("select_driver", false);
+			jMain.addProperty("web_order_id", "12345678");
+			
+			JsonObject jSender = new JsonObject();
+			jSender.addProperty("name", "Angela");
+			jSender.addProperty("mobile", "+6287654321");
+			jSender.addProperty("email", "angela@exampe.com");
+			jMain.add("sender", jSender);
+			
+			JsonObject jOrigin = new JsonObject();
+			jOrigin.addProperty("address", "Jl. Kebagusan 1");
+			jOrigin.addProperty("city", "Jakarta Barat");
+			jOrigin.addProperty("state", "Jakarta Barat");
+			jOrigin.addProperty("country", "Indonesia");
+			jOrigin.addProperty("postcode", "11410");
+			jMain.add("origin", jOrigin);
+			jMain.addProperty("origin_comments", "Use the side door");
+			
+			JsonObject jrecipient = new JsonObject();
+			jrecipient.addProperty("name", "Sven");
+			jrecipient.addProperty("mobile", "+62 12345678");
+			jrecipient.addProperty("email", "sven@example.com");
+			jMain.add("recipient", jrecipient);
+			
+			JsonObject jpackage = new JsonObject();
+			jpackage.addProperty("quantity", 1);
+			jpackage.addProperty("transaction_value", 100000);
+			jpackage.addProperty("insurance", false);
+			jpackage.addProperty("photo", "http://www.flickr.com/bird.jpg");
+			jpackage.addProperty("size", "+62 12345678");
+			jpackage.addProperty("weight", "Motorcycle");
+			jpackage.addProperty("volume", 0.1);
+			jpackage.addProperty("note", "Fragile");
+			jpackage.addProperty("width", 1);
+			jpackage.addProperty("height", 1);
+			jpackage.addProperty("length", 1);
+			jpackage.addProperty("locker_dropoff", false);
+			jMain.add("package", jpackage);			
+			jMain.addProperty("merchant_id", "MRCHNT123");
+			jMain.addProperty("paid_by_parent", true);
+			jMain.addProperty("isCOD",false);
+			jMain.addProperty("pickup_time", 1475402400);
+			jMain.addProperty("destination_comments", "Call 123 if nobody is in");
+			
+			/*StringEntity input = new StringEntity("\"select_driver\",\"web_order_id\",{\"sender\":[\"name\":\",\"mobile\":\",\"email\":\"],{\"origin\":[\"address\":\","
+					+ "\"city\":\",\"state\":\",\"country\":\",\"postcode\":\"],\"origin_comments\":\",\"recipient\":"
+					+ "{\"name\":\",\"mobile\":\",\"email\":\"},\"destination\":{\"address\":\",\"city\":\",\"state\":\",\"country\":\",\"postcode\":\"},"
+					+ "\"package\":{\"quantity\":\",\"transaction_value\":\",\"insurance\":\",\"photo\":\",\"size\":\",\"weight\":\",\"volume\":\",\"note\":\",\"width\":\","
+					+ "\"height\":\",\"length\":\",\"locker_dropoff\":\"},\"merchant_id\":\",\"paid_by_parent\":\",\"isCOD\":\",\"pickup_time\":\",\"destination_comments\":\"}}");
+			*/
+
+			String input = jMain.toString();
+			System.out.println(input);
+			StringEntity se = new StringEntity(input,"UTF-8");
+		    se.setContentType("application/json");
+		    request = new HttpPost("http://api.etobee.com:3001/api/create_order");
+		    request.setEntity(se);
+		    String authString = "indosat@etobee.com" + ":" + "indosat123";
+			System.out.println("auth string: " + authString);
+			byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
+			String authStringEnc = new String(authEncBytes);
+			System.out.println("GenericServiceImpl.etobeeServiceCreate() authStringEnc "+authStringEnc);
+		    request.addHeader("Authorization", "Basic "+authStringEnc);
+		    request.addHeader("Content-Type", "application/json");
+		    HttpResponse response = client.execute(request);
+		    int code = response.getStatusLine().getStatusCode();
+		    System.out.println("Etobee Response Code" +code);
+		    System.out.println(Arrays.toString(request.getAllHeaders()));
+		    
+		    if(code==200){
+		     entity = response.getEntity();
+		     String content = EntityUtils.toString(entity);
+		     map.put("Status", "SUCCESS");
+		     log.info("GenericServiceImpl.etobeeServiceCreate() success "+content);
+		    }else{
+		     entity = response.getEntity();
+		     String content = EntityUtils.toString(entity);
+		     log.info("GenericServiceImpl.etobeeServiceCreate() failed "+content);
+		    }
+		}catch(Exception ce){
+			IndoUtil.populateErrorMap(map, "Saturn-1024", "",0);
+			log.error("Saturn-2051- GenericServiceImpl.etobeeServiceCreate() ce "+IndoUtil.getFullLog(ce));
+		}finally{
+	    	  log.info("***********Closing Streams********");
+	    	  try {
+	    		  	EntityUtils.consumeQuietly(entity);
+		    		  	if(null!=request){
+		    		  		request.releaseConnection();
+		    		  	}if(null!=client){
+		    		  		client.close();
+		    		  	}
+					} catch (IOException e) {
+					log.info("Saturn-2051- Exception Occured "+e);
+				}
+	      } 
+		return map;
+	}
+}
