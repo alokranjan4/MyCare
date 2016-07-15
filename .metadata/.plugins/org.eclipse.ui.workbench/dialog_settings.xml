@@ -28,6 +28,12 @@
 			<item value="org.jboss.tools.jst.web"/>
 			<item value="org.eclipse.jpt.jpa"/>
 			<item value="org.eclipse.jpt.jpa/org.eclipse.jpt.jpa.eclipselink"/>
+			<item value="org.jboss.tools.seam.ui"/>
+			<item value="org.eclipse.datatools.sql"/>
+			<item value="org.eclipse.wst.web.ui"/>
+			<item value="org.eclipse.jst.ws.ui.new"/>
+			<item value="org.eclipse.wst.XMLCategory"/>
+			<item value="org.eclipse.ui.Examples"/>
 		</list>
 	</section>
 	<section name="InstallationDialogSettings">

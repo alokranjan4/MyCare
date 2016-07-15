@@ -378,3 +378,44 @@
 
 !ENTRY org.jboss.ide.eclipse.as.core 1 0 2016-07-12 12:17:00.516
 !MESSAGE Module IJoin on JBoss AS 7.1 not yet fully deployed. Waiting...
+!SESSION 
+
+!ENTRY org.jboss.ide.eclipse.as.core 1 16842760 2016-07-13 16:36:03.805
+!MESSAGE Server Starting
+
+!ENTRY org.jboss.ide.eclipse.as.core 1 16842769 2016-07-13 16:36:10.469
+!MESSAGE Server Startup Succeeded
+
+!ENTRY org.jboss.ide.eclipse.as.core 1 0 2016-07-13 16:36:36.711
+!MESSAGE Module IJoin on JBoss AS 7.1 not yet fully deployed. Waiting...
+
+!ENTRY org.jboss.ide.eclipse.as.core 2 0 2016-07-13 16:36:56.717
+!MESSAGE Module IJoin on JBoss AS 7.1 still not ready to be shown in browser. Aborting delay.
+
+!ENTRY org.jboss.ide.eclipse.as.wtp.core 1 16973825 2016-07-13 19:17:10.601
+!MESSAGE Server processes have been terminated.
+!SESSION 
+
+!ENTRY org.jboss.ide.eclipse.as.core 1 16842760 2016-07-14 12:10:23.553
+!MESSAGE Server Starting
+
+!ENTRY org.jboss.ide.eclipse.as.core 1 0 2016-07-14 12:10:30.677
+!MESSAGE Module IJoin on JBoss AS 7.1 not yet fully deployed. Waiting...
+
+!ENTRY org.jboss.ide.eclipse.as.core 1 16842769 2016-07-14 12:10:30.678
+!MESSAGE Server Startup Succeeded
+
+!ENTRY org.jboss.ide.eclipse.as.core 2 0 2016-07-14 12:10:50.697
+!MESSAGE Module IJoin on JBoss AS 7.1 still not ready to be shown in browser. Aborting delay.
+
+!ENTRY org.jboss.ide.eclipse.as.core 1 0 2016-07-15 11:53:08.864
+!MESSAGE Module IJoin on JBoss AS 7.1 not yet fully deployed. Waiting...
+
+!ENTRY org.jboss.ide.eclipse.as.core 2 0 2016-07-15 11:53:28.917
+!MESSAGE Module IJoin on JBoss AS 7.1 still not ready to be shown in browser. Aborting delay.
+
+!ENTRY org.jboss.ide.eclipse.as.core 1 0 2016-07-15 11:54:14.635
+!MESSAGE Module IJoin on JBoss AS 7.1 not yet fully deployed. Waiting...
+
+!ENTRY org.jboss.ide.eclipse.as.core 2 0 2016-07-15 11:54:34.647
+!MESSAGE Module IJoin on JBoss AS 7.1 still not ready to be shown in browser. Aborting delay.
