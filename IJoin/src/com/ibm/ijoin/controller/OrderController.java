@@ -17,13 +17,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.ibm.ijoin.service.GenericService;
 import com.ibm.ijoin.util.IndoUtil;
 
-/*
-* 
-* @Author Alok Ranjan
-* 
-* 
-* */
-
 @Controller
 public class OrderController {
 	@Autowired
