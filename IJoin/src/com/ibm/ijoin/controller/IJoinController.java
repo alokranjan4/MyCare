@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 
 import org.apache.log4j.Logger;
+import org.jboss.security.annotation.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +23,12 @@ import com.ibm.ijoin.util.HeaderCoder;
 import com.ibm.ijoin.util.IndoUtil;
 import com.ibm.ijoin.util.SessionUtil;
 import com.ibm.services.vo.LoginVO;
-
+/*
+ * 
+ * @Author Alok Ranjan
+ * 
+ * 
+ * */
 
 @RestController
 @RequestMapping("/service")

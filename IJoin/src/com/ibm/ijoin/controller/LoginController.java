@@ -24,7 +24,7 @@ import com.ibm.ijoin.util.SessionUtil;
 import com.ibm.services.vo.LoginVO;
 
 /**
- * @author Aadam
+ * @author Alok Ranjan
  *
  */
 @Controller
