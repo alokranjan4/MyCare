@@ -20,13 +20,50 @@
 	type="text/javascript">
 	
 </script>
+<style type="text/css">     
+    select {
+        width:200px;
+    }
+    label{
+    	font-weight:100;
+    }
+</style>
 <script>
 
 
 
 $(document).ready(function(){
-		// $('#submit').validator()
-	      $("#submit").on('click',function(){
+
+
+	
+			$("#new_back").on('click',function(){
+				 $("#editSSPPage").hide();
+		    	  $("#showSSPPage").hide();
+		    	  $("#newSSPPage").hide();
+		    	  $("#operatinPage").show();
+				  $("#PACK_CODE").val('select');
+			 }); 
+    
+			$("#edit_back").on('click',function(){
+				 $("#editSSPPage").hide();
+		    	  $("#showSSPPage").hide();
+		    	  $("#newSSPPage").hide();
+		    	  $("#operatinPage").show();
+		    	  $("#PACK_CODE").val('select');
+			 }); 
+   
+			
+			$("#show_back").on('click',function(){
+				 $("#editSSPPage").hide();
+		    	  $("#showSSPPage").hide();
+		    	  $("#newSSPPage").hide();
+		    	  $("#operatinPage").show();
+		    	  $("#PACK_CODE").val('select');
+			 }); 
+   
+			
+			
+			$("#submit").on('click',function(){
 	    	//  var Package_Code=document.NewSspPackage.PackageCode.value; 
 	    	var Package_Code=$("#PackageCode").val();
 	    	if(Package_Code==""||Package_Code==null){
@@ -63,23 +100,10 @@ $(document).ready(function(){
     	  $("#editSSPPage").hide();
     	  $("#showSSPPage").hide();
     	  $("#newSSPPage").show();
-    		$.ajax({
-    			url : "getSSPOffer?action=new",
-  				method : "POST"
-
-  			}).done(function(data) {
-  				if (null != data.Status && data.Status === "SUCCESS") {
-  					$("#msg").removeClass("text-danger");
-					$("#msg").addClass("text-success");
-					$("#msg").html("New Form "); 
-   					}
-  				
-		    });
-     	 }); 
+    }); 
   	
       
   		$("#edit").on('click',function(){
-
 /*select box validation .*/
  			var Package_Code=$("#PACK_CODE").val();
 	 		if(Package_Code=="select"||Package_Code==null){
@@ -248,25 +272,26 @@ $(document).ready(function(){
 							<h3 class="panel-title">SSP OFFER Information</h3>
 						</div>
 						<div class="panel-body">
-						<div>
-<!-- Select_Form  -->						
+						<div id="operatinPage">
+<!-- Select_Form  -->			
+							
 						<form class="" style="padding-top: 1em;" action="getSSPOffer" method="post" id="SSP_Offers" name="SSP_Offers">
 						<div class="row">
 						       <div>
-							&nbsp&nbsp <font size="4"> Status: <span id="msg"></span></p> </font>
+							&nbsp&nbsp  Status: <span id="msg"></span>
 								</div>
 								<div class="col-md-8 ">
 								
 						<select name="PACK_CODE" id="PACK_CODE">
-									<option>select</option>
+									<option>Select</option>
 								<c:forEach items="${list}" var="entry">
 									<option>${entry["PACK_CODE"]}</option>
 								</c:forEach>
 						</select> 
 							<input class="btn btn-default" type="button" name="action" value="New" id="new"> 
-							<input class="btn btn-default" type="button" name="action" value="edit" id="edit">
-						    <input class="btn btn-default" type="button" name="action" value="delete" id="delete">
-						    <input class="btn btn-default" type="button" name="action" value="show" id="show">
+							<input class="btn btn-default" type="button" name="action" value="Edit" id="edit">
+						    <input class="btn btn-default" type="button" name="action" value="Delete" id="delete">
+						    <input class="btn btn-default" type="button" name="action" value="Show" id="show">
 						    </div>
 						   </div>
 						 </form> 
@@ -301,9 +326,11 @@ $(document).ready(function(){
 								<br> <br> <br>
 								<div class="form-group">
 									<div class="col-sm-8" align="center">
-										<input type="button" class="btn btn-default" class="form-control" id="submit" value="submit"  />
+										<input type="button" class="btn btn-default" class="form-control" id="Submit" value="submit"  />
 										 &nbsp &nbsp &nbsp
-										 <input type="reset" class="btn btn-default" class="form-control"  value="cancel" />
+										 <input type="button" class="btn btn-default" id="new_back" name="new_back"  value='Back'>
+										 &nbsp &nbsp &nbsp
+										 <input type="reset" class="btn btn-default" class="form-control"  value="Cancel" />
 									</div>
 								</div>
 							</div>
@@ -338,9 +365,11 @@ $(document).ready(function(){
 								<br> <br> <br>
 								<div class="form-group">
 									<div class="col-sm-8" align="center">
-										<input type="button" class="btn btn-default" class="form-control"  value="update" id="update" />
+										<input type="button" class="btn btn-default" class="form-control"  value="Update" id="update" />
 										 &nbsp &nbsp &nbsp
-									     <input type="reset" class="btn btn-default" class="form-control"  value="cancel" />
+										 	<input type="button" class="btn btn-default" id="edit_back" name="edit_back"  value='Back'>
+										 &nbsp &nbsp &nbsp
+									     <input type="reset" class="btn btn-default" class="form-control"  value="Cancel" />
 									</div>
 								</div>
 							</div>
@@ -373,6 +402,13 @@ $(document).ready(function(){
 										<label for="ShortCode" class="col-sm-3 control-label">Short Code:</label>
 										<div class="col-sm-8" >
 											<input type="text" class="form-control" id="show_short_code" name="ShortCode" placeholder="ShortCode" value='' disabled>
+										</div>
+									</div>
+									
+									<div class="form-group">
+										<label for="show_back" class="col-sm-3 control-label"></label>
+										<div class="col-sm-8" align="center" >
+											<input type="button" class="btn btn-default" id="show_back" name="show_back"  value='Back'>
 										</div>
 									</div>
 								</div>

@@ -20,6 +20,14 @@
 	type="text/javascript">
 	
 </script>
+<style type="text/css">     
+    select {
+        width:200px;
+    }
+    label{
+    	font-weight:100;
+    }
+</style>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Forget password</title>
 </head>
@@ -30,7 +38,7 @@
 			<div class="col-md-5 col-md-offset-3" style="padding-top: 10em;">
 				<div class="panel panel-info">
 					<div class="panel-heading">
-						<h3 class="panel-title">Enter Email ID </h3>
+						<h3 class="panel-title">Forgot password </h3>
 					</div>
 					<div class="panel-body">
 						<form class="form-horizontal" action="forgot" method="post">

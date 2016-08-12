@@ -20,11 +20,20 @@
 	type="text/javascript">
 	
 </script>
+<style type="text/css">     
+    select {
+        width:200px;
+    }
+    label{
+    	font-weight:100;
+    }
+</style>
+
 <script>
 var request;  
 function sendInfo(){   
 	var v=document.offers.Offer_ID.value;  
-	var url="getOfferAjaxOfferID?action="+v;  
+	var url="getPackCode?action="+v;  
 	if(window.XMLHttpRequest){  
 		request=new XMLHttpRequest();  
 		}  
@@ -58,73 +67,56 @@ function sendInfo(){
 
 <script>
 $(document).ready(function(){
-	// without image    
-	 /*
-	$("#submit").on('click',function(){
-    	var v_offer_id=$("#offer_id").val();
-   		var v_pack_code=$("#pack_code").val();
-   		if(v_offer_id==""||v_offer_id==null){
-		    document.getElementById("offer_id").style.borderColor = "red";
-			return false;
-		 }else if(v_pack_code==""||v_pack_code==null){
-			 document.getElementById("offer_id").style.borderColor = "";
-			 document.getElementById("pack_code").style.borderColor = "red";
-			 return false;
-		 }
-    	
-    	$.ajax({
-			url : "newOffer",
-			data : {
-				"offer_id" : $("#offer_id").val(),
-				"pack_code" : $("#pack_code").val(),
-				"tariff" : $("#tariff").val(),
-				"offer_Name_ID" : $("#offer_Name_ID").val(),
-				"offer_Name_EN" : $("#offer_Name_EN").val(),
-				"banefit_ID" : $("#banefit_ID").val(),
-				"banner_Image_En" : $("#banner_Image_En").val(),
-				"BUY_EXTRA_FLAG" : $("#BUY_EXTRA_FLAG").val(),
-				"banefit_EN" : $("#banefit_EN").val(),
-				"keyword" : $("#keyword").val(),
-				"param" : $("#param").val(),
-				"offer_Link" : $("#offer_Link").val(),
-				"offer_Type" : $("#offer_Type").val(),
-				"customer_Type" : $("#customer_Type").val(),
-				"banner_Image_ID" : $("#banner_Image_ID").val(),
-			},
-			method : "POST"
+	
+	$("#Offer_ID").on('change',function(){
+		$.ajax({
+			url : "getPackCode?action="+$("#Offer_ID").val(),
+			method : "GET"
 		}).done(function(data) {
 			if (null != data.Status && data.Status === "SUCCESS") {
-				document.getElementById("offer_id").style.borderColor = "";
-				document.getElementById("pack_code").style.borderColor = "";
-				$("#Offer_ID").append('<option value='+$("#offer_id").val()+'>'+$("#offer_id").val()+'</option>');
-	  		  	$("#PACKAGE_Code").append('<option value='+$("#pack_code").val()+'>'+$("#pack_code").val()+'</option>');
-				
-				$("#msg").removeClass("text-danger");
-				$("#msg").addClass("text-success");
-				$("#msg").html("Record Inserted Successfully."); 
-				$("#offer_id").val('');
-				$("#pack_code").val('');
-				$("#tariff").val('');
-				$("#offer_Name_ID").val('');
-				$("#offer_Name_EN").val('');
-				$("#banefit_ID").val('');
-				$("#banner_Image_En").val('');
-				$("#keyword").val('');
-				$("#param").val('');
-				$("#offer_Link").val('');
-				$("#offer_Type").val('');
-				$("#customer_Type").val('');
-				$("#banner_Image_ID").val('');
-			  } else {
+				console.log(data);
+				$('#PACKAGE_Code').find('option').remove().end().append('<option value="s_null">Select</option>').val('s_null');
+				for( i=0;i<=data.list.length-1;i++){
+	 				 $('#PACKAGE_Code').append($("<option></option>").attr("value",data.list[i]).text(data.list[i])); 
+	 				 }
+			} else {
 				$("#msg").removeClass("text-success");
 				$("#msg").addClass("text-danger");
-				$("#msg").html("Record Insertion fail. Please try again.");
+				$("#msg").html("Record Not  Found. Please try again.");
 			}
 	    });
+		}); 
+
+	
+	$("#new_back").on('click',function(){
+		 $("#showOfferForm").hide();
+	 	 $("#newOfferForm").hide();
+		 $("#editOfferForm").hide();
+    	 $("#operatinPage").show();
+		 $("#Offer_ID").val('Select');
+		 $("#PACKAGE_Code").val('s_null');
 	 }); 
-  */
-  
-  
+
+	$("#edit_back").on('click',function(){
+		 $("#showOfferForm").hide();
+	 	 $("#newOfferForm").hide();
+		 $("#editOfferForm").hide();
+	   	 $("#operatinPage").show();
+		 $("#Offer_ID").val('Select');
+		 $("#PACKAGE_Code").val('s_null');
+	 }); 
+
+	$("#show_back").on('click',function(){
+		 $("#showOfferForm").hide();
+	 	 $("#newOfferForm").hide();
+		 $("#editOfferForm").hide();
+	   	 $("#operatinPage").show();
+		 $("#Offer_ID").val('Select');
+		 $("#PACKAGE_Code").val('s_null');
+	 }); 
+
+	
+	
 	$("#submit").on('click',function(){
     	var v_offer_id=$("#offer_id").val();
    		var v_pack_code=$("#pack_code").val();
@@ -136,7 +128,6 @@ $(document).ready(function(){
 			 document.getElementById("pack_code").style.borderColor = "red";
 			 return false;
 		 }
-    	
    	  console.log($("#banner_Image_En").val());
    	  console.log($("#banner_Image_ID").val());
   	  var form =$("#newOffer").get(0); 
@@ -200,20 +191,7 @@ $("#new").on('click',function(){
 	  $("#showOfferForm").hide();
 	  $("#editOfferForm").hide();
 	  $("#newOfferForm").show();
-		$.ajax({
-			url : "getOffer?action=new",
-			method : "POST"
-		}).done(function(data) {
-			if (null != data.Status && data.Status === "SUCCESS") {
-				$("#msg").removeClass("text-danger");
-				$("#msg").addClass("text-success");
-				$("#msg").html("New Form "); 
-				
-			} else {
-				console.log(data.Status);
-			}
-	    });
-	 }); 
+	}); 
 
 
 	$("#edit").on('click',function(){
@@ -221,12 +199,12 @@ $("#new").on('click',function(){
 		var offerID=$("#Offer_ID").val();
 		var packageCode=$("#PACKAGE_Code").val();
 		
- 		if(offerID=="select"||offerID==null){
+ 		if(offerID=="Select"||offerID==null){
  			$("#msg").addClass("text-danger");
  			$("#msg").html("Please select an option.");
  		  document.getElementById("Offer_ID").style.borderColor = "red";
  			return false;
-		}else if(packageCode=="select"||packageCode==null){
+		}else if(packageCode=="s_null"||packageCode==null){
 			$("#msg").addClass("text-danger");
  			$("#msg").html("Please select an option.");
 	 	    document.getElementById("Offer_ID").style.borderColor = "";
@@ -297,7 +275,7 @@ $("#new").on('click',function(){
 			fd.append("edit_CustomerType",$("#edit_CustomerType").val());
 			fd.append("edit_BannerImageID",$("#edit_BannerImageID").val());
 		$.ajax({
-			url : "EditOffer",
+			url : "editOffer",
 			data :fd,
 			processData: false,  // tell jQuery not to process the data
           contentType: false,   // tell jQuery not to set contentType
@@ -336,12 +314,12 @@ $("#new").on('click',function(){
 		var offerID=$("#Offer_ID").val();
 		var packageCode=$("#PACKAGE_Code").val();
 		
- 		if(offerID=="select"||offerID==null){
+ 		if(offerID=="Select"||offerID==null){
  			$("#msg").addClass("text-danger");
  			$("#msg").html("Please select an option.");
  		  document.getElementById("Offer_ID").style.borderColor = "red";
  			return false;
-		}else if(packageCode=="select"||packageCode==null){
+		}else if(packageCode=="s_null"||packageCode==null){
 			$("#msg").addClass("text-danger");
  			$("#msg").html("Please select an option.");
 	 	    document.getElementById("Offer_ID").style.borderColor = "";
@@ -386,16 +364,15 @@ $("#new").on('click',function(){
   });
 	
 	$("#show").on('click',function(){	
-		
 		var offerID=$("#Offer_ID").val();
 		var packageCode=$("#PACKAGE_Code").val();
 		
- 		if(offerID=="select"||offerID==null){
+ 		if(offerID=="Select"||offerID==null){
  			$("#msg").addClass("text-danger");
  			$("#msg").html("Please select an option.");
  		  document.getElementById("Offer_ID").style.borderColor = "red";
  			return false;
-		}else if(packageCode=="select"||packageCode==null){
+		}else if(packageCode=="s_null"||packageCode==null){
 			$("#msg").addClass("text-danger");
  			$("#msg").html("Please select an option.");
 	 	    document.getElementById("Offer_ID").style.borderColor = "";
@@ -428,6 +405,8 @@ $("#new").on('click',function(){
 				$("#show_OfferNameEN").val(data.list[0]["OFFER_NAME_EN"]);
 				$("#show_BenefitID").val(data.list[0]["BENEFIT_ID"]);
 				$("#show_BannerImageEN").attr('src', 'data:image/jpeg;base64,'+data.list[0]["BANNER_IMAGE_EN"]);
+				$("#show_BannerImageEN").attr("width","250");
+				$("#show_BannerImageEN").attr("height","200");
 				$("#show_BenefitEN").val(data.list[0]["BENEFIT_EN"]);
 				$("#show_Keyword").val(data.list[0]["KEYWORD"]);
 				$("#show_Param").val(data.list[0]["PARAM"]);
@@ -435,8 +414,8 @@ $("#new").on('click',function(){
 				$("#show_OfferType").val(data.list[0]["OFFER_TYPE"]);
 				$("#show_CustomerType").val(data.list[0]["CUST_TYPE"]);
 				$("#show_Banner_Image_ID").attr('src', 'data:image/jpeg;base64,'+data.list[0]["BANNER_IMAGE_ID"]);
-			
-			
+				$("#show_Banner_Image_ID").attr("width","250");
+				$("#show_Banner_Image_ID").attr("height","200");
 			}else{
 				$("#msg").removeClass("text-success");
 				$("#msg").addClass("text-danger");
@@ -465,31 +444,27 @@ $("#new").on('click',function(){
 							<h3 class="panel-title">Offer Information</h3>
 						</div>
 						<div class="panel-body">
-						<div >
+						<div id="operatinPage">
 <!-- Select_Form  -->
 						   <form class="" style="padding-top: 1em;" action="getOffer" method="post" name="offers">
 						<div class="row">
 							  	<div>
-								&nbsp&nbsp <font size="4"> Status: <span id="msg"></span></p> </font>
+								&nbsp&nbsp  Status: <span id="msg"></span>
 								</div>
 							  
 							<select name="Offer_ID" id="Offer_ID" onchange="sendInfo()">
-								<option>select</option>
+								<option>Select</option>
 								<c:forEach items="${list}" var="entry">
 									<option>${entry["OFFER_ID"]}</option>
 								</c:forEach>
 							</select>
 							 <select name="PACKAGE_Code" id="PACKAGE_Code">
-							  
-							 	<c:forEach items="${Ajexlist}" var="entry">
-									<option>${entry["PACKAGE_CODE"]}</option>
-								</c:forEach>
-							</select> 
-					         <input class="btn btn-default" type="button" name="action" value="New" id="new"/>
-							 <input class="btn btn-default" type="button" name="action" value="Edit" id="edit"/>
-							 <input class="btn btn-default" type="button" name="action" value="delete" id="delete"/>
-							 <input class="btn btn-default" type="button" name="action" value="show" id="show"/>
-				         </div>
+									<option value="s_null">Select</option>
+							 </select> 
+							<input class="btn btn-default" type="button" name="action" value="New" id="new">
+							 <input class="btn btn-default" type="button" name="action" value="Edit" id="edit">
+							 <input class="btn btn-default" type="button" name="action" value="Delete" id="delete">
+							 <input class="btn btn-default" type="button" name="action" value="Show" id="show">				         </div>
 						</form>
 						</div>
 <!-- New_Form -->
@@ -562,7 +537,7 @@ $("#new").on('click',function(){
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="offerLink" class="col-sm-3 control-label">offer Link:</label>
+										<label for="offerLink" class="col-sm-3 control-label">Offer Link:</label>
 										<div class="col-sm-6">
 											<input type="text" id="offer_Link" class="form-control" name="offerLink" placeholder="offerLink">
 										</div>
@@ -588,8 +563,9 @@ $("#new").on('click',function(){
 									<br>
 									<div class="form-group">
 										<div class="col-sm-8" align="right">
-											<input type="button" class="btn btn-default" class="form-control" value="submit" id="submit" /> &nbsp &nbsp &nbsp
-											 <input type="reset" class="btn btn-default" class="form-control" value="cancel" />
+											<input type="button" class="btn btn-default" class="form-control" value="Submit" id="submit" /> &nbsp &nbsp &nbsp
+											<input type="button" class="btn btn-default" id="new_back" name="new_back"  value='Back'>&nbsp &nbsp &nbsp
+											 <input type="reset" class="btn btn-default" class="form-control" value="Cancel" />
 										</div>
 									</div>
 								</div>
@@ -668,7 +644,7 @@ $("#new").on('click',function(){
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="offerLink" class="col-sm-3 control-label">offer Link:</label>
+										<label for="offerLink" class="col-sm-3 control-label">Offer Link:</label>
 										<div class="col-sm-6">
 											<input type="text" id="edit_offerLink" class="form-control" name="offerLink" placeholder="offerLink" value=''>
 										</div>
@@ -694,8 +670,9 @@ $("#new").on('click',function(){
 									<br>
 									<div class="form-group">
 										<div class="col-sm-8" align="right">
-											<input type="button" class="btn btn-default" class="form-control" value="update"  id="update"/> &nbsp &nbsp &nbsp
-											 <input type="reset" class="btn btn-default" class="form-control" value="cancel" />
+											<input type="button" class="btn btn-default" class="form-control" value="Update"  id="update"/> &nbsp &nbsp &nbsp
+											<input type="button" class="btn btn-default" id="edit_back" name="edit_back"  value='Back'>&nbsp &nbsp &nbsp
+											 <input type="reset" class="btn btn-default" class="form-control" value="Cancel" />
 										</div>
 									</div>
 								</div>
@@ -749,7 +726,7 @@ $("#new").on('click',function(){
 									<div class="form-group">
 										<label for="BannerImageEN" class="col-sm-3 control-label">Banner EN:</label>
 										<div class="col-sm-6">
-											<img class="img-rounded" id="show_BannerImageEN"  src='' height='200' width='250' border='5' >
+											<img class="img-rounded" id="show_BannerImageEN"  src='images/loader.gif' height='48' width='48' border='5' >
 										</div>
 									</div>
 								</div>
@@ -773,7 +750,7 @@ $("#new").on('click',function(){
 										</div>
 									</div>
 									<div class="form-group">
-										<label for="offerLink" class="col-sm-3 control-label">offer Link:</label>
+										<label for="offerLink" class="col-sm-3 control-label">Offer Link:</label>
 										<div class="col-sm-6">
 											<input type="text" class="form-control" id="show_offerLink" name="offerLink" placeholder="offerLink" value='${list[0]["OFFER_LINK"]}' disabled>
 										</div>
@@ -793,16 +770,16 @@ $("#new").on('click',function(){
 									<div class="form-group">
 										<label for="BannerImageID" class="col-sm-3 control-label">Banner ID:</label>
 										<div class="col-sm-6">
-											<img class="img-rounded" id="show_Banner_Image_ID" src='' height='200' width='250' border='5' >
+											<img class="img-rounded" id="show_Banner_Image_ID" src='images/loader.gif' height='48' width='48' border='5' >
 										</div>
 									</div>
 								</div>
 							</div>
+							<div align="center">
+							<input type="button" class="btn btn-default" id="show_back" name="show_back"  value='Back'/>
+							</div>	
 						</form>
-		
 				</div>
-						
-						
 						</div>
 					</div>
 			</div>

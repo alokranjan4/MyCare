@@ -27,7 +27,7 @@ public class PrinceUtil implements Serializable{
 	@Autowired
 	JdbcTemplate littlePrince;
 	
-	private static Logger log = Logger.getLogger("saturnLoggerV1");
+	private static Logger log = Logger.getLogger("ijoinLogger");
 	
 	@Transactional(readOnly=true)
 	public List<Map<String, Object>> getData(String qry, Object[] pAttr){

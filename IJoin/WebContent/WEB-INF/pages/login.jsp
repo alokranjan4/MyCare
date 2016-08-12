@@ -19,6 +19,15 @@
 	type="text/javascript">
 	
 </script>
+
+<style type="text/css">     
+    select {
+        width:200px;
+    }
+    label{
+    	font-weight:100;
+    }
+</style>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Login</title>
 </head>

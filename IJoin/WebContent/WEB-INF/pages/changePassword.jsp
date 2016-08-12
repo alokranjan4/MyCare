@@ -20,6 +20,18 @@
 	type="text/javascript">
 	
 </script>
+
+<script>
+$(document).ready(function(){
+		
+	  		$("li").each(function(){
+  			$(this).removeClass("active");
+  		});
+		$("#user_type").addClass("active");
+});
+</script>
+
+
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Change password</title>
 </head>
@@ -30,7 +42,7 @@
 			<div class="col-md-6 col-md-offset-3" style="padding-top: 10em;">
 				<div class="panel panel-info">
 					<div class="panel-heading">
-						<h3 class="panel-title">Set new Password</h3>
+						<h3 class="panel-title">Set new password</h3>
 					</div>
 					<div class="panel-body">
 						<form class="form-horizontal" action="changePassword?action=newPassowrd" method="post">

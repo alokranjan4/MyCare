@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 
 public class EmailService {
 	private static EmailService mailService = null;
-	private static Logger logger = Logger.getLogger("saturnLoggerV1");
+	private static Logger logger = Logger.getLogger("ijoinLogger");
 
 	IndoServiceProperties confProp=IndoServiceProperties.getInstance();
     Properties props = confProp.getConfigSingletonObject();

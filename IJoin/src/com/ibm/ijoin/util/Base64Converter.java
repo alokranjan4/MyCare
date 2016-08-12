@@ -14,7 +14,7 @@ import sun.misc.BASE64Decoder;
 
 public class Base64Converter {
 	
-	private static Logger log = Logger.getLogger("im2");
+	private static Logger log = Logger.getLogger("ijoinLogger");
 
 	public  static String  encodeImage(byte[] imageByteArray) {
 		 log.info("BannerEn  : 2");

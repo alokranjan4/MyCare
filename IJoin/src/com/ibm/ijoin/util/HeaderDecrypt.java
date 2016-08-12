@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
  *
  */
 public class HeaderDecrypt {
-	private static Logger log = Logger.getLogger("saturnLoggerV1");
+	private static Logger log = Logger.getLogger("ijoinLogger");
 	public static String decryptMsisdnHeader(String msisdnRaw){
 	 	log.info("HeaderDecrypt.decryptMsisdnHeader() START ");
 	 	log.info("HeaderDecrypt.decryptMsisdnHeader() ");

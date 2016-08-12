@@ -19,19 +19,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ibm.ijoin.service.GenericService;
+import com.ibm.ijoin.service.PackageService;
 import com.ibm.ijoin.util.IndoUtil;
 import com.ibm.ijoin.util.SessionUtil;
 import com.ibm.services.vo.LoginVO;
 
 /**
- * @author Aadam
+ * @author Alok Ranjan
  *
  */
 @Controller
 public class LoginController {
 	@Autowired
 	GenericService genService;
-	private static Logger log = Logger.getLogger("im2");
+	
+	@Autowired
+	PackageService packageService;
+	private static Logger log = Logger.getLogger("ijoinLogger");
 	
 	/**
 	 * This service is used to authenticate the agent.
@@ -57,23 +61,22 @@ public class LoginController {
 		Map<String, Object> data = new HashMap<String,Object>();
 		if(null==params.get("LoginID") || StringUtils.isEmpty(params.get("LoginID"))){
 			log.info("LoginController.loginService(-).............user id :."+params.get("LoginID")+" "+params.get("Password"));
-			
 			return "login";
 		}
-		
 		data =  genService.validateUser(params.get("LoginID"), params.get("Password"));
 		log.info("LoginController.loginService(-).............start."+data);
-		if(data.containsKey("LoginID")){
-		String LoginID=data.get("LoginID").toString();
-		HttpSession session = req.getSession();
-	    session.setAttribute("LoginID", LoginID);
-		}
 		if(IndoUtil.isSuccess(data)){
 			LoginVO vo = new LoginVO();
 			vo.setAuthenticationFlag("Y");
-			vo.setUserid(params.get("userid"));
+			vo.setUserid(params.get("LoginID"));
+			if(null!=data.get("TYPE")){
+				vo.setChannelType(data.get("TYPE").toString());
+			}else{
+				vo.setChannelType("AGENT");
+			}
+			log.info("LoginController.loginService()-- vo"+vo);
 			SessionUtil.setLoginVO(req, vo);
-			return "home";
+			return "order";
 		}else{
 			model.addAttribute("msg",IndoUtil.eMsg("Invalid userid/password."));
 			return "login";

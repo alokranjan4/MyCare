@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
  */
 public class IndoServiceProperties implements Serializable {
 	 static final long serialVersionUID = 10000000001L;
-	 private static Logger log = Logger.getLogger("saturnLoggerV1");
+	 private static Logger log = Logger.getLogger("ijoinLogger");
 	 private static Properties configProp   =   null;
 	 private static  volatile IndoServiceProperties  uniqueInstance;
 	 private IndoServiceProperties(){ }

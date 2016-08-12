@@ -29,7 +29,7 @@ public class IndoContextListener implements ServletContextListener{
 	Scheduler scheduler = null;
 	@Override
 	public void contextDestroyed(ServletContextEvent arg0) {
-		log.info("Saturn.contextDestroyed()- ServletContextListener destroyed");
+		log.info("Ijoin.contextDestroyed()- ServletContextListener destroyed");
 		if(null!=scheduler){
 			try {
 				scheduler.shutdown(false);
@@ -43,25 +43,25 @@ public class IndoContextListener implements ServletContextListener{
         //Run this before web application is started
 	@Override
 	public void contextInitialized(ServletContextEvent arg0) {
-		log.info("Saturn.contextInitialized()- ServletContextListener started");
+		log.info("Ijoin.contextInitialized()- ServletContextListener started");
 		InputStream businessIS = null;
 		try {
 			servletContext = arg0.getServletContext();
-			log.debug("Saturn.contextInitialized() servletContext " + servletContext);	
+			log.debug("Ijoin.contextInitialized() servletContext " + servletContext);	
 			businessIS =this.getClass().getClassLoader().getResourceAsStream("indo.properties");
 					//servletContext.getResource(configDir+"indo.properties").openStream();
 			PROPERTY.load(businessIS);
 			PropertyConfigurator.configure(PROPERTY);
-			log.info("Saturn.contextInitialized() properties file loaded Successfully.");
+			log.info("Ijoin.contextInitialized() properties file loaded Successfully.");
 			businessIS =this.getClass().getClassLoader().getResourceAsStream("saturn.properties");
 			LANGPROPERTY.load(businessIS);
 			PropertyConfigurator.configure(LANGPROPERTY);
-			log.info("Saturn.contextInitialized() lang properties file loaded Successfully.");
+			log.info("Ijoin.contextInitialized() lang properties file loaded Successfully.");
 			if (null != businessIS) {
 				businessIS.close();
 			}
 		} catch (Exception e) {
-			log.error("Saturn.contextInitialized - e " +IndoUtil.getFullLog(e));
+			log.error("Ijoin.contextInitialized - e " +IndoUtil.getFullLog(e));
 		}finally{
 			if (null != businessIS) {
 				try {businessIS.close();} catch (IOException e) {}

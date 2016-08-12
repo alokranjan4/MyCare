@@ -15,46 +15,68 @@
 <script
 	src='<c:out value="${pageContext.request.contextPath}"/>/js/bootstrap.min.js' type="text/javascript">
 </script>
-<script>
-var request;  
-function sendInfo(){   
-	var v=document.Stores.ID.value;  
-	var url="getStoreAjaxID?action="+v;  
-	if(window.XMLHttpRequest){  
-		request=new XMLHttpRequest();  
-		}  
-		else if(window.ActiveXObject){  
-		request=new ActiveXObject("Microsoft.XMLHTTP");  
-		}  
-		try  
-		{  
-		request.onreadystatechange=getInfo;  
-		request.open("GET",url,true);  
-		request.send();  
-		}  
-		catch(e)  
-		{  
-		alert("Unable to connect to server");  
-		}  
-		}  
-		  
-		function getInfo(){  
-		if(request.readyState==4){  
-		var val=request.responseText;  
-		document.getElementById('NAME').innerHTML=val;  
-		} 
-}  
-</script>
+<style type="text/css">     
+    select {
+        width:200px;
+    }
+    label{
+    	font-weight:100;
+    }
+</style>
 <style type="text/css">     
     select {
         width:200px;
     }
 </style>
 <script>
-
 $(document).ready(function(){
-      $("#submit").on('click',function(){
-    	  
+	$("#ID").on('change',function(){
+		$.ajax({
+			url : "getStoreAjaxID?action="+$("#ID").val(),
+			method : "GET"
+		}).done(function(data) {
+			if (null != data.Status && data.Status === "SUCCESS") {
+				console.log(data);
+				$('#NAME').find('option').remove().end().append('<option value="s_null">Select</option>').val('s_null');
+				for( i=0;i<=data.list.length-1;i++){
+	 				 $('#NAME').append($("<option></option>").attr("value",data.list[i]).text(data.list[i])); 
+	 				 }
+			} else {
+				$("#msg").removeClass("text-success");
+				$("#msg").addClass("text-danger");
+				$("#msg").html("Record Not  Found. Please try again.");
+			}
+	    });
+		}); 
+  
+	$("#new_back").on('click',function(){ 
+		 $("#newStoreForm").hide();
+   	    $("#showStoreForm").hide();
+	 	$("#editStoreForm").hide();
+	     $("#operatinPage").show();
+		 $("#ID").val('select');
+		 $("#NAME").val('select');  
+	});
+	
+
+	$("#edit_back").on('click',function(){ 
+		 $("#newStoreForm").hide();
+   	    $("#showStoreForm").hide();
+	 	$("#editStoreForm").hide();
+	     $("#operatinPage").show();
+		 $("#ID").val('select');
+		 $("#NAME").val('select');  
+	}); 
+	
+	$("#show_back").on('click',function(){ 
+		 $("#newStoreForm").hide();
+  	    $("#showStoreForm").hide();
+	 	$("#editStoreForm").hide();
+	     $("#operatinPage").show();
+		 $("#ID").val('select');
+		 $("#NAME").val('select');  
+	});
+		$("#submit").on('click',function(){
     	  var v_StoreID=$("#StoreID").val();
     	  var v_StoreName=$("#StoreName").val();
     	  
@@ -68,7 +90,7 @@ $(document).ready(function(){
   		 }
     	  
     		$.ajax({
-  				url : "newStoreInfo",
+  				url : "newStore",
   				data : {
 					"StoreID" : $("#StoreID").val(),
 					"StoreName" : $("#StoreName").val(),
@@ -108,30 +130,18 @@ $(document).ready(function(){
     	  $("#editStoreForm").hide();
     	  $("#showStoreForm").hide();
     	  $("#newStoreForm").show();
-    		$.ajax({
-  				url : "getStore?action=new",
-  				method : "POST"
-  			}).done(function(data) {
-  				if (null != data.Status && data.Status === "SUCCESS") {
-  					$("#msg").removeClass("text-danger");
-					$("#msg").addClass("text-success");
-					$("#msg").html("New Form "); 
-   				  } else {
-  					console.log(data.Status);
-  				}
-		    });
-     	 }); 
+    }); 
   	  
   		$("#edit").on('click',function(){
   			var id=$("#ID").val();
   			var name=$("#NAME").val();
   			
-  	 		if(id=="select"||id==null){
+  	 		if(id=="Select"||id==null){
   	 			$("#msg").addClass("text-danger");
   	 			$("#msg").html("Please select an option.");
   	 		  document.getElementById("ID").style.borderColor = "red";
   	 			return false;
-  			}else if(name=="select"||name==null){
+  			}else if(name=="s_null"||name==null){
   				$("#msg").addClass("text-danger");
   	 			$("#msg").html("Please select an option.");
   		 	    document.getElementById("ID").style.borderColor = "";
@@ -218,12 +228,12 @@ $(document).ready(function(){
   			var id=$("#ID").val();
   			var name=$("#NAME").val();
   			
-  	 		if(id=="select"||id==null){
+  	 		if(id=="Select"||id==null){
   	 			$("#msg").addClass("text-danger");
   	 			$("#msg").html("Please select an option.");
   	 		  document.getElementById("ID").style.borderColor = "red";
   	 			return false;
-  			}else if(name=="select"||name==null){
+  			}else if(name=="s_null"||name==null){
   				$("#msg").addClass("text-danger");
   	 			$("#msg").html("Please select an option.");
   		 	    document.getElementById("ID").style.borderColor = "";
@@ -267,12 +277,12 @@ $(document).ready(function(){
   			var id=$("#ID").val();
   			var name=$("#NAME").val();
   			
-  	 		if(id=="select"||id==null){
+  	 		if(id=="Select"||id==null){
   	 			$("#msg").addClass("text-danger");
   	 			$("#msg").html("Please select an option.");
   	 		  document.getElementById("ID").style.borderColor = "red";
   	 			return false;
-  			}else if(name=="select"||name==null){
+  			}else if(name=="s_null"||name==null){
   				$("#msg").addClass("text-danger");
   	 			$("#msg").html("Please select an option.");
   		 	    document.getElementById("ID").style.borderColor = "";
@@ -322,13 +332,17 @@ $(document).ready(function(){
 		$("#showallStore").addClass("active");
     	  
 });
+
+function myFunction(){   
+	$("#NAME").val('s_null');
+}
 </script>
 
 
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Show All Store</title>
 </head>
-<body>
+<body  onload="myFunction()">
 	<div class="container"><c:import url='/jsp/nav.jsp'></c:import>
 		<div class="row">
 			<div class="col-md-12">
@@ -338,40 +352,37 @@ $(document).ready(function(){
 							<h3 class="panel-title">Store Information</h3>
 						</div>
 						<div class="panel-body">
+						<div id="operatinPage">
 <!-- Select_Form -->						
 							<form class="" style="padding-top: 1em;" action="getStore" method="post" name="Stores">
 							   <div class="row">
 									<div>
-									&nbsp&nbsp <font size="4"> Status: <span id="msg"></span></p> </font>
+									&nbsp&nbsp  Status: <span id="msg"></span>
 								</div>
 						     
-							<select name="ID" id="ID"  onchange="sendInfo()">
-								<option>select</option>
+							<select name="ID" id="ID"  >
+								<option>Select</option>
 								<c:forEach items="${list}" var="entry">
 									<option>${entry["ID"]}</option>
 								</c:forEach>
 							</select> 
 							<select name="NAME" id="NAME">
-						
-								<c:forEach items="${Ajexlist}" var="entry">
-									<option>${entry["NAME"]}</option>
-								</c:forEach>
+									<option value="s_null">Select</option>
 							</select> 
 							<input class="btn btn-default" type="button" name="action" value="New" id="new">
 							 <input class="btn btn-default" type="button" name="action" value="Edit" id="edit">
-							 <input class="btn btn-default" type="button" name="action" value="delete" id="delete">
-							 <input class="btn btn-default" type="button" name="action" value="show" id="show">
+							 <input class="btn btn-default" type="button" name="action" value="Delete" id="delete">
+							 <input class="btn btn-default" type="button" name="action" value="Show" id="show">
 						</div>	
 						</form>
-						</div>
+							</div>
 						<div>
 						</div>
-					</div>
 				
 				</div>
 				<div id="newStoreForm" style="display:none">
 <!-- New_Form -->				
-					<form style="padding-top: 2em; class="form-horizontal" action="newStoreInfo" method="post">
+					<form class="form-horizontal" action="newStoreInfo" style="padding-top: 2em;   method="post">
 							<div class="row">
 								<div class="col-md-8 ">
 									<div class="form-group">
@@ -422,8 +433,9 @@ $(document).ready(function(){
 								<br> <br> <br>
 								<div class="form-group">
 									<div class="col-sm-8" align="center">
-										<input type="button" class="btn btn-default" class="form-control" value="submit" id="submit" /> &nbsp &nbsp &nbsp
-									    <input type="reset" class="btn btn-default" class="form-control" value="cancel" />
+										<input type="button" class="btn btn-default" class="form-control" value="Submit" id="submit" /> &nbsp &nbsp &nbsp
+				 				<input type="button" class="btn btn-default" id="new_back" name="new_back"  value='Back'>&nbsp &nbsp &nbsp
+									    <input type="reset" class="btn btn-default" class="form-control" value="Cancel" />
 									</div>
 								</div>
 							</div>
@@ -431,7 +443,7 @@ $(document).ready(function(){
 				</div>
 <!-- Edit_Form -->
 				 <div id="editStoreForm"  style="display:none">
-				 				<form style="padding-top: 2em; class="form-horizontal" action="EditStoreInfo" method="post">
+				 				<form class="form-horizontal" style="padding-top: 2em;  action="EditStoreInfo" method="post">
 							<div class="row">
 								<div class="col-md-8 ">		
 																	
@@ -483,8 +495,9 @@ $(document).ready(function(){
 								<br> <br> <br>
 								<div class="form-group">
 									<div class="col-sm-8" align="center">
-										<input type="button" class="btn btn-default" class="form-control" value="update" id="update"/> &nbsp &nbsp &nbsp
-									    <input type="reset" class="btn btn-default" class="form-control" value="cancel" />
+										<input type="button" class="btn btn-default" class="form-control" value="Update" id="update"/> &nbsp &nbsp &nbsp
+										<input type="button" class="btn btn-default" id="edit_back" name="edit_back"  value='Back'>&nbsp &nbsp &nbsp
+									    <input type="reset" class="btn btn-default" class="form-control" value="Cancel" />
 									</div>
 								</div>
 							</div>
@@ -492,7 +505,7 @@ $(document).ready(function(){
 			 </div>
 <!-- show_Form -->
 			 <div id="showStoreForm" style="display:none">
-			 						<form style="padding-top: 2em; class="form-horizontal" action="EditStoreInfo" method="post">
+			 						<form class="form-horizontal" style="padding-top: 2em;  action="EditStoreInfo" method="post">
 								<div>
 								<c:out value="${msg}" escapeXml="false"/>
 								</div>
@@ -544,15 +557,21 @@ $(document).ready(function(){
 										<label for="StoreDescription" class="col-sm-3 control-label">Store Description:</label>
 										<div class="col-sm-8">
 											<input type="text" class="form-control" name="StoreDescription" id="show_Store_Description"placeholder="StoreDescription"  value='' disabled>
-											 
 										</div>
 									</div>
 									<br> 
+									<div class="form-group">
+										<label for="show_back" class="col-sm-3 control-label"></label>
+										<div class="col-sm-8" align="center">
+											<input type="button" class="btn btn-default" id="show_back" name="show_back"  value='Back'>										</div>
+										</div>
 								</div>
 							</div>
 					</form>
 			 </div>
 			 
+			</div>
+		
 			</div>
 		</div>
 	</div>

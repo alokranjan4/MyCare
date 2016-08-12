@@ -54,7 +54,7 @@ import com.icare.eps.EPSOrderWebserviceMobaServiceLocator;
  * 
  */
 public class IndoUtil implements IndoConstants {
-	private static Logger log = Logger.getLogger("im2");
+	private static Logger log = Logger.getLogger("ijoinLogger");
 	IndoServiceProperties confProp=IndoServiceProperties.getInstance();
     Properties prop = confProp.getConfigSingletonObject();
 	

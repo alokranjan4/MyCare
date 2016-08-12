@@ -14,7 +14,17 @@
 	type="text/javascript"> </script>
 <script
 	src='<c:out value="${pageContext.request.contextPath}"/>/js/bootstrap.min.js'
-	type="text/javascript"> </script>
+	type="text/javascript"> 
+	</script>
+	
+<style type="text/css">     
+    select {
+        width:200px;
+    }
+    label{
+    	font-weight:100;
+    }
+</style>	
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Order Management</title>
 </head>

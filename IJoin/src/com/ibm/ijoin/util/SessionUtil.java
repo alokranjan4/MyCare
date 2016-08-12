@@ -19,7 +19,7 @@ public class SessionUtil {
 
 	static IndoServiceProperties confProp=IndoServiceProperties.getInstance();
 	public static Properties prop = confProp.getConfigSingletonObject();
-	private static Logger log = Logger.getLogger("saturnLoggerV1");
+	private static Logger log = Logger.getLogger("ijoinLogger");
 	public static boolean userStatus(HttpServletRequest req){
 		
 		LoginVO vo = getLoginVO(req);
@@ -60,24 +60,18 @@ public class SessionUtil {
 		log.info("SessionUtil.getListMsisdns() msisdnList "+msisdnList);
 		return msisdnList;
 	}
-	public static boolean isAuthorised(HttpServletRequest req, String msisdn){
-		msisdn = IndoUtil.prefix62(msisdn);
-		log.info("SessionUtil.isAuthorised() msisdn "+msisdn);
-		List<String> list = getListMsisdns(req);
-		log.info("SessionUtil.isAuthorised() list "+list);
-		if(null!=list && list.contains(msisdn)){
+	public static boolean isAuthorised(HttpServletRequest req){
+		LoginVO vo = getLoginVO(req);
+		if(null!=vo && null!=vo.getChannelType()){
 			return true;
 		}
-		/*List<Map<String, Object>> msisdns =  getMsisdns(req);
-		if(null!=msisdns){
-			for(Map<String, Object> map : msisdns){
-				if(null!=map.get("msisdn")){
-					if(map.get("msisdn").toString().equals(msisdn)){
-						return true;
-					}
-				}
-			}
-		}*/
+		return false;
+	}
+	public static boolean isAdmin(HttpServletRequest req){
+		LoginVO vo = getLoginVO(req);
+		if(null!=vo && null!=vo.getChannelType() && vo.getChannelType().equalsIgnoreCase("ADMIN")){
+			return true;
+		}
 		return false;
 	}
 	public static void setToken(HttpServletRequest req, String token){
@@ -107,5 +101,8 @@ public class SessionUtil {
 	public static boolean setLoginVO(HttpServletRequest req, LoginVO vo){
 		req.getSession().setAttribute("loginVO", vo);
 		return true;
+	}
+	public static void setMsisdn(HttpServletRequest req, String msisdn){
+		req.getSession().setAttribute("userMsisdn", msisdn);
 	}
 }

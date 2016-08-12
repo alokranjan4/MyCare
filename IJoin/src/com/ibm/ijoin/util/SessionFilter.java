@@ -22,7 +22,7 @@ import com.ibm.services.vo.LoginVO;
 
 public class SessionFilter implements Filter {
 	
-	private static Logger log = Logger.getLogger("saturnLoggerV1");
+	private static Logger log = Logger.getLogger("ijoinLogger");
 	
     public SessionFilter() {
     	super();

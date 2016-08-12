@@ -32,7 +32,7 @@ import org.jsoup.select.Elements;
  */
 public class IndoXMLParseUtil {
 	
-	private static Logger log = Logger.getLogger("saturnLoggerV1");
+	private static Logger log = Logger.getLogger("ijoinLogger");
 	
 	public static Map<String,String> getAttributes(List<String> attributes, String xml, String url){
 		//log.debug("IndoXMLParseUtil.getAttributes() xml - "+xml);

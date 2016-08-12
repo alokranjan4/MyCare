@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 
 public class HistoryShorted {
 
-	private static Logger log = Logger.getLogger("saturnLoggerV1");
+	private static Logger log = Logger.getLogger("ijoinLogger");
     List<Map<String,String>> resListMap=new ArrayList<Map<String,String>>();
 
 	public List<Map<String, String>> sortHistoryMap(ArrayList<Map<String, String>> list2) {

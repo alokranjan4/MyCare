@@ -32,7 +32,7 @@ import com.ibm.ijoin.util.IndoUtil;
  */
 @Service
 public class HttpConnServiceImpl implements HttpConnService{
-	private static Logger log = Logger.getLogger("saturnLoggerV1");
+	private static Logger log = Logger.getLogger("ijoinLogger");
 	@Override
 	public CloseableHttpClient getHttpClient() {
 		log.info("HttpConnServiceImpl.getHttpClient() - START");

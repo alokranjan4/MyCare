@@ -20,57 +20,78 @@
 	type="text/javascript">
 	
 </script>
-
-<script>
-var request;  
-function sendInfo(){   
-	var v=document.packageInformation.PACKAGE_NAME1.value;  
-	var url="getPackageInformationAjax?action="+v;  
-	if(window.XMLHttpRequest){  
-		request=new XMLHttpRequest();  
-		}  
-		else if(window.ActiveXObject){  
-		request=new ActiveXObject("Microsoft.XMLHTTP");  
-		}  
-		try  
-		{  
-		request.onreadystatechange=getInfo;  
-		request.open("GET",url,true);  
-		request.send();  
-		}  
-		catch(e)  
-		{  
-		alert("Unable to connect to server");  
-		}  
-		}  
-		function getInfo(){  
-		if(request.readyState==4){  
-		var val=request.responseText;  
-		document.getElementById("PACKAGE_GROUP1").options.length = 0;
-		document.getElementById('PACKAGE_GROUP1').innerHTML=val;  
-		
-		} 
-}  
-</script>
+<style type="text/css">     
+    select {
+        width:200px;
+    }
+    label{
+    	font-weight:100;
+    }
+</style>
 <script>
 $(document).ready(function(){
+	
+	$("#PACKAGE_NAME1").on('change',function(){
+		$.ajax({
+			url : "getPackaGroup?action="+$("#PACKAGE_NAME1").val(),
+			method : "GET"
+		}).done(function(data) {
+			if (null != data.Status && data.Status === "SUCCESS") {
+				console.log(data);
+				$('#PACKAGE_GROUP1').find('option').remove().end().append('<option value="s_null">Select</option>').val('s_null');
+				for( i=0;i<=data.list.length-1;i++){
+	 				 $('#PACKAGE_GROUP1').append($("<option></option>").attr("value",data.list[i]).text(data.list[i])); 
+	 				 }
+			} else {
+				$("#msg").removeClass("text-success");
+				$("#msg").addClass("text-danger");
+				$("#msg").html("Record Not  Found. Please try again.");
+			}
+	    });
+		}); 
+	
+			$("#new_back").on('click',function(){ 
+				 $("#editPackageInformation").hide();
+				 $("#newPackageInformation").hide();
+				 $("#showPackageInformation").hide()
+			     $("#operatinPage").show();
+				 $("#PACKAGE_NAME1").val('Select');
+				 $("#PACKAGE_GROUP1").val('s_null');  
+			});
+		
+			$("#edit_back").on('click',function(){ 
+			$("#editPackageInformation").hide();
+		 	$("#newPackageInformation").hide();
+		 	$("#showPackageInformation").hide()
+      		$("#operatinPage").show();
+	  		$("#PACKAGE_NAME1").val('Select');
+	 		$("#PACKAGE_GROUP1").val('s_null');  
+			});
+	
+			$("#show_back").on('click',function(){ 
+				$("#editPackageInformation").hide();
+			 	$("#newPackageInformation").hide();
+			 	$("#showPackageInformation").hide()
+	      		$("#operatinPage").show();
+		  		$("#PACKAGE_NAME1").val('Select');
+		 		$("#PACKAGE_GROUP1").val('s_null');  
+			});
+		
+	
+	
 	      $("#submit").on('click',function(){
-	    	 
 	    	  var v_PACKAGE_NAME=$("#PACKAGE_NAME").val();
 	    	  var v_PACKAGE_GROUP=$("#PACKAGE_GROUP").val();
-	    	  
 	     		if(v_PACKAGE_NAME==""||v_PACKAGE_NAME==null){
 	  		    document.getElementById("PACKAGE_NAME").style.borderColor = "red";
 	  			return false;
-	  		 }else if(v_PACKAGE_GROUP==""||v_PACKAGE_GROUP==null){
+	  		 }else if(v_PACKAGE_GROUP=="s_null"||v_PACKAGE_GROUP==null){
 	  			 document.getElementById("PACKAGE_NAME").style.borderColor = "";
 	  			 document.getElementById("PACKAGE_GROUP").style.borderColor = "red";
 	  			 return false;
 	  		 }
-	    	  
-	    	  
     		$.ajax({
-  				url : "newPackage2",
+  				url : "newPackInfor",
   				data : {
 					"PACKAGE_NAME" : $("#PACKAGE_NAME").val(),
 					"PACKAGE_GROUP" : $("#PACKAGE_GROUP").val(),
@@ -125,19 +146,7 @@ $(document).ready(function(){
     	  $("#showPackageInformation").hide();
     	  $("#editPackageInformation").hide();
     	  $("#newPackageInformation").show();
-    		$.ajax({
-  				url : "getPackage2?action=new",
-  				method : "POST"
-  			}).done(function(data) {
-  				if (null != data.Status && data.Status === "SUCCESS") {
-  					$("#msg").removeClass("text-danger");
-					$("#msg").addClass("text-success");
-					$("#msg").html("New Form "); 
-   				  } else {
-  					console.log(data.Status);
-  				}
-		    });
-     	 }); 
+     }); 
   	
       
   		$("#edit").on('click',function(){
@@ -148,12 +157,12 @@ $(document).ready(function(){
   			var packageGroup=$("#PACKAGE_GROUP1").val();
   			var packageName=$("#PACKAGE_NAME1").val();
   			
-  	 		if(packageName=="select"||packageName==null){
+  	 		if(packageName=="Select"||packageName==null){
   	 			$("#msg").addClass("text-danger");
   	 			$("#msg").html("Please select an option.");
   	 		  document.getElementById("PACKAGE_NAME1").style.borderColor = "red";
   	 			return false;
-  			}else if(packageGroup=="select"||packageGroup==null){
+  			}else if(packageGroup=="s_null"||packageGroup==null){
   				$("#msg").addClass("text-danger");
   	 			$("#msg").html("Please select an option.");
   		 	    document.getElementById("PACKAGE_NAME1").style.borderColor = "";
@@ -170,7 +179,7 @@ $(document).ready(function(){
 	   	 $("#newPackageInformation").hide();
 		 $("#editPackageInformation").show();
 			$.ajax({
-  				url : "getPackage2?action=edit",
+  				url : "getPackInfor?action=edit",
   				data :{
   					"PACKAGE_GROUP1": $("#PACKAGE_GROUP1").val(),
   					"PACKAGE_NAME1": $("#PACKAGE_NAME1").val()
@@ -209,7 +218,7 @@ $(document).ready(function(){
   
   		$("#update").on('click',function(){
      		$.ajax({
-     			url : "editPackage2",
+     			url : "editPackInfor",
    				data : {
 					"PACK_NAME" : $("#edit_PACKAGE_NAME").val(),
 					"PACK_GROUP" : $("#edit_PACKAGE_GROUP").val(),
@@ -262,12 +271,12 @@ $(document).ready(function(){
   			var packageGroup=$("#PACKAGE_GROUP1").val();
   			var packageName=$("#PACKAGE_NAME1").val();
   			
-  	 		if(packageName=="select"||packageName==null){
+  	 		if(packageName=="Select"||packageName==null){
   	 			$("#msg").addClass("text-danger");
   	 			$("#msg").html("Please select an option.");
   	 		  document.getElementById("PACKAGE_NAME1").style.borderColor = "red";
   	 			return false;
-  			}else if(packageGroup=="select"||packageGroup==null){
+  			}else if(packageGroup=="s_null"||packageGroup==null){
   				$("#msg").addClass("text-danger");
   	 			$("#msg").html("Please select an option.");
   		 	    document.getElementById("PACKAGE_NAME1").style.borderColor = "";
@@ -282,10 +291,9 @@ $(document).ready(function(){
   		  $("#showPackageInformation").hide();
     	  $("#editPackageInformation").hide();
     	  $("#newPackageInformation").hide();
-    
   			
   			$.ajax({
-  				url : "getPackage2?action=delete",
+  				url : "getPackInfor?action=delete",
   				data :{
   					"PACKAGE_GROUP1": $("#PACKAGE_GROUP1").val(),
   					"PACKAGE_NAME1": $("#PACKAGE_NAME1").val()
@@ -313,12 +321,12 @@ $(document).ready(function(){
   			var packageGroup=$("#PACKAGE_GROUP1").val();
   			var packageName=$("#PACKAGE_NAME1").val();
   			
-  	 		if(packageName=="select"||packageName==null){
+  	 		if(packageName=="Select"||packageName==null){
   	 			$("#msg").addClass("text-danger");
   	 			$("#msg").html("Please select an option.");
   	 		  document.getElementById("PACKAGE_NAME1").style.borderColor = "red";
   	 			return false;
-  			}else if(packageGroup=="select"||packageGroup==null){
+  			}else if(packageGroup=="s_null"||packageGroup==null){
   				$("#msg").addClass("text-danger");
   	 			$("#msg").html("Please select an option.");
   		 	    document.getElementById("PACKAGE_NAME1").style.borderColor = "";
@@ -334,7 +342,7 @@ $(document).ready(function(){
   			 $("#newPackageInformation").hide();
   			 $("#showPackageInformation").show();
   			 $.ajax({
-  				url : "getPackage2?action=show",
+  				url : "getPackInfor?action=show",
   				data :{
   					"PACKAGE_GROUP1": $("#PACKAGE_GROUP1").val(),
   					"PACKAGE_NAME1": $("#PACKAGE_NAME1").val()
@@ -378,14 +386,6 @@ $(document).ready(function(){
 });
 </script>
 
-
-<style type="text/css">     
-    select {
-        width:200px;
-    }
-</style>
-
-
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Show Package Information</title>
 </head>
@@ -400,31 +400,28 @@ $(document).ready(function(){
 						</div>
 
 						<div class="panel-body">
-					<div>	
+					<div id="operatinPage">	
 <!-- Select_Form -->		
 					<form class="" style="padding-top: 1em;" action="getPackage2" method="post" name="packageInformation">
 							<div class="row">
 								<div>
-								&nbsp&nbsp <font size="4"> Status: <span id="msg"></span></p> </font>
+								&nbsp&nbsp  Status: <span id="msg"></span>
 								</div>
 							 	<br>
 							
-								<select name="PACKAGE_NAME1" id="PACKAGE_NAME1" onchange="sendInfo()">
-								<option>select</option>
+								<select name="PACKAGE_NAME1" id="PACKAGE_NAME1" onchange="">
+								<option>Select</option>
 								<c:forEach items="${list}" var="entry">
 									<option>${entry["PACKAGE_NAME"]}</option>
 								</c:forEach>
 							</select> 
 							<select name="PACKAGE_GROUP1" id="PACKAGE_GROUP1">
-							
-								<c:forEach items="${Ajexlist}" var="entry">
-									<option>${entry["PACKAGE_GROUP"]}</option>
-								</c:forEach>
+							<option value="s_null">Select</option>
 							</select>
 							<input class="btn btn-default" type="button" name="action" value="New" id="new"/>
 							 <input class="btn btn-default" type="button" name="action" value="Edit" id="edit"/>
-							 <input class="btn btn-default" type="button" name="action" value="delete" id="delete"/>
-							 <input class="btn btn-default" type="button" name="action" value="show" id="show"/>
+							 <input class="btn btn-default" type="button" name="action" value="Delete" id="delete"/>
+							 <input class="btn btn-default" type="button" name="action" value="Show" id="show"/>
 							</div>
 							</form>
 							</div>
@@ -581,9 +578,9 @@ $(document).ready(function(){
 									<br> 
 									<div class="form-group">
 										<div class="col-sm-10" align="right">
-											<input type="button" id="submit" class="btn btn-default" class="form-control" value="submit" /> &nbsp &nbsp &nbsp <input
-												type="reset" class="btn btn-default" class="form-control"
-												value="cancel" />
+											<input type="button" id="submit" class="btn btn-default" class="form-control" value="Submit" /> &nbsp &nbsp &nbsp 
+											<input type="button" class="btn btn-default" id="new_back" name="new_back"  value='Back'>  &nbsp &nbsp &nbsp
+											<input type="reset" class="btn btn-default" class="form-control" value="Cancel" />
 										</div>
 									</div>
 									</div>
@@ -730,8 +727,9 @@ $(document).ready(function(){
 									<br> 
 									<div class="form-group">
 										<div class="col-sm-10" align="right">
-											<input type="button" class="btn btn-default" id="update" class="form-control" value="update" /> &nbsp &nbsp &nbsp 
-											<input type="reset" class="btn btn-default" class="form-control" value="cancel" />
+											<input type="button" class="btn btn-default" id="update" class="form-control" value="Update" /> &nbsp &nbsp &nbsp 
+ 											<input type="button" class="btn btn-default" id="edit_back" name="edit_back"  value='Back'>  &nbsp &nbsp &nbsp 
+											<input type="reset" class="btn btn-default" class="form-control" value="Cancel" />
 										</div>
 									</div>
 									</div>
@@ -889,7 +887,11 @@ $(document).ready(function(){
 									</div>
 									
 									</div>
+									<div align="center">
+									 	<input type="button" class="btn btn-default" id="show_back" name="show_back"  value='Back'>
 									</div>
+									</div>
+									
 								</form>
 							
 							</div>							
